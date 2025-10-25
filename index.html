@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-R" />
+    <title>Genesis Launcher</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="shortcut icon" href="icons/vanilla/icon64.png" type="image/x-icon">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body data-theme="funkin">
+    <nav id="title-bar">
+      <div class="title-bar-drag-region">
+        <div class="title-bar-left">
+          <img src="" id="title-bar-icon" class="title-icon" />
+          <span id="title-bar-title">Genesis Launcher</span>
+        </div>
+      </div>
+      
+      <div class="title-bar-right">
+        <button id="min-btn" class="window-control-btn">
+          <i class="fas fa-minus"></i>
+        </button>
+        <button id="max-btn" class="window-control-btn">
+          <i class="far fa-square"></i>
+        </button>
+        <button id="close-btn" class="window-control-btn close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </nav>
+
+    <div class="app-layout">
+      <div class="sidebar" id="sidebar">
+        <div class="nav-top">
+          <div class="sidebar-buttons-group">
+            <button class="nav-button config-btn" id="config-btn">
+              <i class="fas fa-sliders-h"></i> <span>Configuración</span>
+            </button>
+          </div>
+        </div>
+        <div id="engine-list">
+          </div>
+      </div>
+
+      <div class="resizer" id="resizer"></div>
+
+      <div class="content">
+        <div id="news-container">
+          </div>
+
+        <div id="download-progress-bar-container" class="hidden">
+          <span id="download-status-text">Descargando...</span>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="download-progress-bar-fill"></div>
+          </div>
+          <div class="download-progress-details">
+            <span id="download-percent-text">0%</span>
+            <span id="download-size-text"></span>
+          </div>
+        </div>
+
+        <footer class="content-footer">
+          <div id="version-selector-button" class="version-selector">
+            <img src="" id="footer-engine-icon" class="engine-icon" />
+            <div class="version-selector-info">
+              <span id="footer-engine-name">Cargando...</span>
+              <span id="footer-version-number">...</span>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+
+          <div class="play-button-container">
+            <div id="os-warning-icon" class="os-warning hidden">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span id="os-warning-tooltip">Esta version no es compatible con tu sistema operativo</span>
+            </div>
+            <button class="nav-button" id="play-btn" disabled>
+              <span id="play-button-text">...</span>
+            </button>
+          </div>
+
+        </footer>
+      </div>
+    </div>
+
+    <div id="version-popup" class="hidden">
+      <div id="version-popup-list">
+        </div>
+    </div>
+
+    <div class="modal-container blur-overlay hidden" id="config-modal-overlay">
+      <div class="modal config-modal">
+        <span class="close-button" id="close-config-modal">&times;</span>
+        <h2>Configuración</h2>
+        <div class="config-option">
+          <label for="theme-select">Tema</label>
+          <select id="theme-select" class="form-select">
+            <option value="funkin">Funkin</option>
+            <option value="black-white">Negro y Blanco</option>
+            <option value="light">Claro</option>
+            <option value="high-contrast">Alto Contraste</option>
+          </select>
+        </div>
+        <div class="config-option">
+          <label for="language-select">Idioma</label>
+          <select id="language-select" class="form-select">
+            <option value="es">Español</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="config-option">
+          <label for="launch-toggle">Ejecutar al instalar</label>
+          <label class="switch">
+            <input type="checkbox" id="launch-toggle" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="config-option">
+          <label for="sound-toggle">Efectos de sonido</label>
+          <label class="switch">
+            <input type="checkbox" id="sound-toggle" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+        <div class="config-option">
+          <label for="cursor-toggle">Cursor personalizado</label>
+          <label class="switch">
+            <input type="checkbox" id="cursor-toggle" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-container blur-overlay hidden" id="loading-overlay">
+      <div class="modal">
+        <h2 id="loading-status">Cargando...</h2>
+        </div>
+    </div>
+
+    <div class="modal-container blur-overlay hidden" id="modal-confirm">
+      <div class="modal confirm-modal">
+        <h2 id="confirm-title">¿Estás seguro?</h2>
+        <p id="confirm-message">Esta acción no se puede deshacer.</p>
+        <div class="confirm-actions">
+          <button class="nav-button confirm-no" id="confirm-no-btn">
+            Olvidalo
+          </button>
+          <button class="nav-button confirm-yes" id="confirm-yes-btn">
+            ¡Si!
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="toast-message">Toast!</span>
+    </div>
+
+    <audio id="audio-open" src="sounds/openWindow.ogg"></audio>
+    <audio id="audio-close" src="sounds/exitWindow.ogg"></audio>
+    <audio id="audio-click-down" src="sounds/ClickDown.ogg"></audio>
+    <audio id="audio-click-up" src="sounds/ClickUp.ogg"></audio>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>
