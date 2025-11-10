@@ -25,13 +25,18 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "icons/ico-ico.png"
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": [
+        "AppImage",
+        "deb"
+      ],
       "category": "Game",
       "icon": "icons/ico-ico.png",
       "maintainer": "LeiveTD <leivetd@gmail.com>"
@@ -51,7 +56,12 @@
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ]
   },
-  "keywords": ["FNF", "Friday Night Funkin", "Launcher", "Game"],
+  "keywords": [
+    "FNF",
+    "Friday Night Funkin",
+    "Launcher",
+    "Game"
+  ],
   "license": "ISC",
   "devDependencies": {
     "electron": "^38.4.0",
@@ -60,6 +70,7 @@
   "dependencies": {
     "adm-zip": "^0.5.16",
     "express": "^5.1.0",
+    "js-yaml": "^4.1.0",
     "marked": "^16.4.1"
   }
 }

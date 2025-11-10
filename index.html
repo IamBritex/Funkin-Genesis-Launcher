@@ -35,9 +35,22 @@
     <div class="app-layout">
       <div class="sidebar" id="sidebar">
         <div class="nav-top">
+          
+          <div class="sidebar-buttons-group">
+            <button class="nav-button config-btn" id="manage-versions-btn">
+              <i class="fas fa-tasks"></i> <span>Gestionar versiones</span>
+            </button>
+          </div>
+          
+          <div class="sidebar-buttons-group">
+            <button class="nav-button config-btn" id="mods-btn">
+              <i class="fas fa-puzzle-piece"></i> <span>Mods</span>
+            </button>
+          </div>
+          
           <div class="sidebar-buttons-group">
             <button class="nav-button config-btn" id="config-btn">
-              <i class="fas fa-sliders-h"></i> <span>Configuración</span>
+              <i class="fas fa-cog"></i> <span>Configuración</span>
             </button>
           </div>
         </div>
@@ -49,6 +62,8 @@
 
       <div class="content">
         <div id="news-container">
+          </div>
+          <div id="mods-container" class="hidden">
           </div>
 
         <div id="download-progress-bar-container" class="hidden">
@@ -156,6 +171,15 @@
       </div>
     </div>
 
+    <div class="modal-container blur-overlay hidden" id="manage-versions-modal-overlay">
+      <div class="modal manage-versions-modal">
+        <span class="close-button" id="close-manage-versions-modal">&times;</span>
+        <h2>Versiones Instaladas</h2>
+        <div class="manage-versions-list" id="manage-versions-list">
+          </div>
+      </div>
+    </div>
+
     <div id="toast">
       <i class="fas fa-check-circle"></i>
       <span id="toast-message">Toast!</span>
@@ -166,6 +190,6 @@
     <audio id="audio-click-down" src="sounds/ClickDown.ogg"></audio>
     <audio id="audio-click-up" src="sounds/ClickUp.ogg"></audio>
 
-    <script src="renderer.js"></script>
+    <script defer src="renderer.js"></script>
   </body>
 </html>
