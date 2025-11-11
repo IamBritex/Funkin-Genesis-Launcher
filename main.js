@@ -2,9 +2,8 @@
 
 const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
 const path = require('path');
-// ¡CAMBIO! Importamos fs.promises para operaciones asíncronas
 const fs = require('fs'); 
-const fsp = fs.promises; // Usaremos 'fsp' para las promesas de 'fs'
+const fsp = fs.promises; 
 const https = require('https');
 const AdmZip = require('adm-zip');
 const { execFile } = require('child_process');
@@ -21,7 +20,6 @@ const SETTINGS_FILE = path.join(LAUNCHER_DIR, 'settings.json');
 const NEWS_DIR = path.join(app.getAppPath(), 'news'); 
 const LOCAL_VERSIONS_FILE = path.join(app.getAppPath(), 'versions.yaml'); 
 
-// Usamos la versión síncrona solo para la configuración inicial
 fs.mkdirSync(VERSIONS_DIR, { recursive: true });
 fs.mkdirSync(MODS_DIR, { recursive: true }); 
 
@@ -49,7 +47,7 @@ function createWindow() {
   
   mainWindow.setMenu(null); 
   mainWindow.loadFile('index.html');
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);
@@ -135,6 +133,10 @@ function executeGame(installPath, exeName) {
   const command = useWine ? 'wine' : finalExePath;
   const args = useWine ? [finalExePath] : [];
 
+  // --- ¡CAMBIO! ---
+  // El CWD (Current Working Directory) sigue siendo el 'installPath'
+  // Esto es VITAL para que el juego encuentre sus assets (imágenes, música, etc.)
+  // El symlink que creamos se encarga de redirigir la carpeta 'mods'.
   const gameProcess = execFile(command, args, { cwd: installPath }, (error, stdout, stderr) => {
     if (mainWindow) {
       mainWindow.setBounds(windowBounds);
@@ -155,6 +157,43 @@ function executeGame(installPath, exeName) {
   });
 }
 
+// --- ¡CAMBIO! ---
+// Pequeña función helper para crear el symlink de forma segura
+function createModSymlink(installPath) {
+  try {
+    const installModsPath = path.join(installPath, 'mods');
+    const linkType = process.platform === 'win32' ? 'junction' : 'dir';
+
+    // 1. Asegurarse de que la carpeta central MODS_DIR exista
+    fs.mkdirSync(MODS_DIR, { recursive: true });
+
+    // 2. Revisar si ya existe algo en 'installPath/mods'
+    let stats;
+    try {
+      // lstat NO sigue el symlink, nos dice qué es el "archivo" mods
+      stats = fs.lstatSync(installModsPath); 
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e; // Re-lanzar si no es "not found"
+      stats = null;
+    }
+
+    // 3. Si existe algo (link o carpeta), borrarlo
+    if (stats) {
+      // fs.rmSync es la forma moderna de borrar carpetas o links
+      fs.rmSync(installModsPath, { recursive: true, force: true });
+    }
+
+    // 4. Crear el nuevo symlink
+    fs.symlinkSync(MODS_DIR, installModsPath, linkType);
+    console.log(`Symlink de mods creado en: ${installModsPath}`);
+
+  } catch (err) {
+    console.error(`Error creando mod symlink en ${installPath}: ${err.message}`);
+    // Enviar un toast, pero no un error que detenga todo
+    mainWindow.webContents.send('download-error', { error: `Error al vincular mods: ${err.message}` });
+  }
+}
+
 // --- LÓGICA DE INSTALACIÓN ---
 ipcMain.on('launch-game', (event, installData) => {
   const { name, engine, v, links, autoLaunch, exeName } = installData;
@@ -170,10 +209,19 @@ ipcMain.on('launch-game', (event, installData) => {
   const nativeExeExists = isLinux && fs.existsSync(exePath);
   const wineExeExists = (isWin || isLinux) && fs.existsSync(wineExePath);
 
+  // --- ¡CAMBIO! ---
+  // Modificado este bloque 'if'
   if (fs.existsSync(installPath) && (nativeExeExists || wineExeExists)) {
+    
+    // --- ¡CAMBIO! ---
+    // Llamamos a nuestra función helper ANTES de ejecutar el juego
+    createModSymlink(installPath); 
+    
     mainWindow.webContents.send('game-ready', { name, path: installPath });
     executeGame(installPath, exeName); 
+
   } else {
+    // --- LÓGICA DE DESCARGA (Modificada) ---
     fs.mkdirSync(installPath, { recursive: true });
     
     const primaryUrl = isLinux ? links.linux : links.windows;
@@ -189,6 +237,11 @@ ipcMain.on('launch-game', (event, installData) => {
         const zip = new AdmZip(zipFilePath);
         zip.extractAllTo(installPath, true);
         fs.unlinkSync(zipFilePath);
+        
+        // --- ¡CAMBIO! ---
+        // Llamamos a nuestra función helper DESPUÉS de descomprimir
+        createModSymlink(installPath); 
+
         mainWindow.webContents.send('download-complete', { name, path: installPath });
         if (autoLaunch) executeGame(installPath, exeName);
       } catch (err) { mainWindow.webContents.send('download-error', { error: `Error al descomprimir: ${err.message}` }); }
@@ -299,8 +352,6 @@ ipcMain.on('delete-install', (event, { engine, v }) => {
   const installPath = path.join(VERSIONS_DIR, engine, v);
   try {
     if (fs.existsSync(installPath)) {
-      // ¡CAMBIO! Usamos la versión asíncrona para borrar
-      // Usamos `fs.rm` en lugar de `fs.rmSync`
       fsp.rm(installPath, { recursive: true, force: true })
         .then(() => {
           event.reply('delete-success', { engine, v });
@@ -310,7 +361,7 @@ ipcMain.on('delete-install', (event, { engine, v }) => {
           mainWindow.webContents.send('download-error', { error: `Error al borrar: ${err.message}` });
         });
     } else {
-      event.reply('delete-success', { engine, v }); // Si no existe, igual fue un éxito
+      event.reply('delete-success', { engine, v }); 
     }
   } catch (err) { 
     console.error("Error al iniciar borrado:", err);
@@ -327,7 +378,6 @@ ipcMain.handle('check-install-status', async (event, { engine, v, exeName }) => 
   const exePath = path.join(installPath, exeName);
   const wineExePath = path.join(installPath, `${exeName}.exe`);
   
-  // ¡CAMBIO! Usamos 'access' asíncrono para chequear
   const checkExists = async (filePath) => {
     try {
       await fsp.access(filePath);
@@ -347,7 +397,6 @@ ipcMain.handle('check-install-status', async (event, { engine, v, exeName }) => 
 // --- MANEJADORES DE PERSISTENCIA (CONFIGURACIÓN) ---
 ipcMain.handle('load-settings', async (event) => {
   try {
-    // ¡CAMBIO! Asíncrono
     await fsp.access(SETTINGS_FILE); 
     const data = await fsp.readFile(SETTINGS_FILE, 'utf-8');
     return { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
@@ -359,68 +408,116 @@ ipcMain.handle('load-settings', async (event) => {
 
 ipcMain.on('save-settings', (event, settingsData) => {
   try {
-    // ¡CAMBIO! Asíncrono. No necesitamos 'await' porque no bloquea.
     fsp.writeFile(SETTINGS_FILE, JSON.stringify(settingsData, null, 2));
   } catch (err) { console.error('Error al guardar settings.json:', err); }
 });
 
-// --- ¡NUEVO! MANEJADORES DE MODS (ASÍNCRONOS) ---
+// --- MANEJADORES DE MODS (ASÍNCRONOS Y SEPARADOS) ---
+
+function getFileUrlFromPath(filePath) {
+  try {
+    const fileURL = new URL('file:');
+    fileURL.pathname = filePath;
+    return fileURL.href;
+  } catch (e) {
+    return null;
+  }
+}
 
 /**
- * Escanea el directorio de mods y devuelve los metadatos de los mods instalados.
- * AHORA ES TOTALMENTE ASÍNCRONO.
+ * ¡CAMBIO! Escanea y detecta Polymod, Psych y Codename (fallback).
+ * AHORA TAMBIÉN DEVUELVE 'folderName'.
  */
 ipcMain.handle('mods:get-installed', async () => {
   let modFolders;
   try {
-    // 1. Lee el directorio de mods de forma asíncrona
     const dirents = await fsp.readdir(MODS_DIR, { withFileTypes: true });
     modFolders = dirents
       .filter(dirent => dirent.isDirectory())
       .map(dirent => dirent.name);
   } catch (e) {
     console.error('Error al escanear directorio de mods:', e.message);
-    return []; // Devuelve vacío si falla
+    return []; 
   }
 
-  // 2. Mapea cada nombre de carpeta a una promesa que lee el JSON
   const readPromises = modFolders.map(async (folderName) => {
-    const metaPath = path.join(MODS_DIR, folderName, '_polymod_meta.json');
+    const modPath = path.join(MODS_DIR, folderName);
+    const polymodPath = path.join(modPath, '_polymod_meta.json');
+    const psychPath = path.join(modPath, 'pack.json');
+    
+    let modData = null;
+
+    // --- Intento 1: Detectar Polymod (V-Slice) ---
     try {
-      // 2a. Chequea si el JSON existe (asíncrono)
-      await fsp.access(metaPath); 
-      // 2b. Lee el archivo (asíncrono)
-      const content = await fsp.readFile(metaPath, 'utf-8'); 
+      await fsp.access(polymodPath); 
+      const content = await fsp.readFile(polymodPath, 'utf-8'); 
       const meta = JSON.parse(content);
       
       if (meta.title && meta.description && meta.mod_version) {
-        return { // Devuelve el objeto del mod
+        modData = {
           title: meta.title,
           description: meta.description,
-          mod_version: meta.mod_version,
+          version: meta.mod_version,
+          modType: 'polymod',
+          engineKey: 'V-Slice',
+          iconPath: null,
         };
       }
-    } catch (e) {
-      // Si access() o readFile() fallan, o el JSON es inválido
-      console.error(`Error al procesar _polymod_meta.json para ${folderName}:`, e.message);
+    } catch (e) { /* No es Polymod, o el JSON es inválido */ }
+
+    // --- Intento 2: Detectar Psych Engine (si no se encontró Polymod) ---
+    if (!modData) {
+      try {
+        await fsp.access(psychPath);
+        const content = await fsp.readFile(psychPath, 'utf-8');
+        const meta = JSON.parse(content);
+        
+        if (meta.name && meta.description) {
+          let iconPath = null;
+          const pngPath = path.join(modPath, 'pack.png');
+          try {
+            await fsp.access(pngPath);
+            iconPath = getFileUrlFromPath(pngPath);
+          } catch (pngErr) { /* No hay pack.png */ }
+          
+          modData = {
+            title: meta.name,
+            description: meta.description,
+            version: null,
+            modType: 'psych',
+            engineKey: 'psych',
+            iconPath: iconPath,
+          };
+        }
+      } catch (e) { /* No es Psych, o el JSON es inválido */ }
     }
-    return null; // Devuelve null si algo falla
+    
+    // --- Fallback: Detectar Codename Engine (si no se encontró nada) ---
+    if (!modData) {
+      modData = {
+        title: folderName, // Título es el nombre de la carpeta
+        description: '- No hay descripcion para codename',
+        version: null,
+        modType: 'codename',
+        engineKey: 'codee', // ID de Codename en versions.yaml
+        iconPath: null,
+      };
+    }
+
+    // ¡CAMBIO! Añadir folderName al objeto final
+    return { ...modData, folderName: folderName };
   });
 
-  // 3. Espera a que todas las promesas de lectura se completen
   const results = await Promise.all(readPromises);
-  
-  // 4. Filtra los resultados nulos (mods fallidos) y devuelve el array final
-  return results.filter(mod => mod !== null);
+  return results;
 });
 
 
 /**
- * Abre un diálogo para seleccionar una carpeta de mod, la valida y la copia.
- * AHORA ES TOTALMENTE ASÍNCRONO.
+ * ¡CAMBIO! Valida Polymod, Psych, o acepta como Codename (fallback).
+ * AHORA TAMBIÉN DEVUELVE 'folderName' DENTRO de 'modData'.
  */
-ipcMain.handle('mods:add-mod', async () => {
-  // El diálogo ya es asíncrono
+ipcMain.handle('mods:validate-mod', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
     title: 'Seleccionar Carpeta del Mod',
     properties: ['openDirectory']
@@ -431,55 +528,115 @@ ipcMain.handle('mods:add-mod', async () => {
   }
 
   const selectedPath = filePaths[0];
-  const metaPath = path.join(selectedPath, '_polymod_meta.json');
   const folderName = path.basename(selectedPath);
   const targetPath = path.join(MODS_DIR, folderName);
+  
+  const polymodPath = path.join(selectedPath, '_polymod_meta.json');
+  const psychPath = path.join(selectedPath, 'pack.json');
 
-  // 1. Validar que el mod no exista ya (Asíncrono)
+  // 1. Validar que el mod no exista ya
   try {
     await fsp.access(targetPath);
-    // Si 'access' tiene éxito, la carpeta ya existe
     return { error: `El mod "${folderName}" ya está instalado.` };
-  } catch (e) {
-    // Si 'access' falla (ENOENT), la carpeta no existe. Continuamos.
-  }
-
-  // 2. Validar que exista _polymod_meta.json (Asíncrono)
-  try {
-    await fsp.access(metaPath);
-  } catch (e) {
-    return { error: 'La carpeta seleccionada no contiene "_polymod_meta.json".' };
-  }
+  } catch (e) { /* No existe, perfecto */ }
 
   let modData;
+  
+  // --- Intento 1: Validar como Polymod ---
   try {
-    // 3. Validar contenido del JSON (Asíncrono)
-    const content = await fsp.readFile(metaPath, 'utf-8');
+    await fsp.access(polymodPath);
+    const content = await fsp.readFile(polymodPath, 'utf-8');
     const meta = JSON.parse(content);
     
     if (!meta.title || !meta.description || !meta.mod_version) {
-      return { error: 'El archivo "_polymod_meta.json" no tiene el formato requerido (title, description, mod_version).' };
+      throw new Error('JSON no tiene el formato Polymod requerido.');
     }
     
     modData = {
       title: meta.title,
       description: meta.description,
-      mod_version: meta.mod_version,
+      version: meta.mod_version,
+      modType: 'polymod',
+      engineKey: 'V-Slice',
+      iconPath: null,
+      folderName: folderName // ¡AÑADIDO!
     };
 
-  } catch (e) {
-    return { error: `Error al leer el JSON: ${e.message}` };
-  }
+    return { success: true, modData, selectedPath, folderName };
 
+  } catch (e) { /* No es Polymod, intentar Psych */ }
+
+  // --- Intento 2: Validar como Psych Engine ---
   try {
-    // 4. Copiar la carpeta (¡LA SOLUCIÓN! Asíncrono)
+    await fsp.access(psychPath);
+    const content = await fsp.readFile(psychPath, 'utf-8');
+    const meta = JSON.parse(content);
+
+    if (!meta.name || !meta.description) {
+      throw new Error('JSON no tiene el formato Psych (pack.json) requerido.');
+    }
+
+    let iconPath = null;
+    const pngPath = path.join(selectedPath, 'pack.png');
+    try {
+      await fsp.access(pngPath);
+      iconPath = getFileUrlFromPath(pngPath);
+    } catch (pngErr) { /* No hay pack.png */ }
+
+    modData = {
+      title: meta.name,
+      description: meta.description,
+      version: null,
+      modType: 'psych',
+      engineKey: 'psych',
+      iconPath: iconPath,
+      folderName: folderName // ¡AÑADIDO!
+    };
+
+    return { success: true, modData, selectedPath, folderName };
+
+  } catch (e) { /* No es Psych */ }
+
+  // --- Fallback: Aceptar como Codename Engine ---
+  modData = {
+    title: folderName,
+    description: '- No hay descripcion para codename',
+    version: null,
+    modType: 'codename',
+    engineKey: 'codee',
+    iconPath: null,
+    folderName: folderName // ¡AÑADIDO!
+  };
+  return { success: true, modData, selectedPath, folderName };
+});
+
+/**
+ * Paso 2: Copia la carpeta del mod.
+ */
+ipcMain.handle('mods:install-mod', async (event, { selectedPath, folderName }) => {
+  const targetPath = path.join(MODS_DIR, folderName);
+  try {
     await fsp.cp(selectedPath, targetPath, { recursive: true });
+    return { success: true };
   } catch (e) {
     return { error: `Error al copiar la carpeta del mod: ${e.message}` };
   }
+});
 
-  // 5. Éxito
-  return { success: true, modData };
+/**
+ * ¡NUEVO! Manejador para borrar un mod.
+ */
+ipcMain.handle('mods:delete-mod', async (event, folderName) => {
+  if (!folderName) {
+    return { error: 'Nombre de carpeta no válido.' };
+  }
+  const targetPath = path.join(MODS_DIR, folderName);
+  try {
+    await fsp.rm(targetPath, { recursive: true, force: true });
+    return { success: true };
+  } catch (e) {
+    return { error: `Error al borrar la carpeta del mod: ${e.message}` };
+  }
 });
 
 
@@ -521,7 +678,6 @@ ipcMain.handle('load-news', async (event) => {
   } catch (err) {
     console.error('Error fetching remote news, falling back to local:', err.message);
     try {
-      // ¡CAMBIO! Asíncrono
       const files = await fsp.readdir(NEWS_DIR);
       const mdFiles = files.filter(file => file.endsWith('.md'));
       

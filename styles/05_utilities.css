@@ -1,0 +1,39 @@
+/* styles/05_utilities.css */
+
+/* --- Estilos para bloquear UI durante descarga --- */
+body.is-downloading .install-item {
+  pointer-events: none;
+  opacity: 0.6;
+}
+body.is-downloading .version-selector {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+body.is-downloading .install-item:hover {
+  background-color: transparent;
+}
+body.is-downloading .install-item.active {
+  background-color: var(--color-grey-light);
+  opacity: 0.8;
+}
+
+/* --- Media Queries (Responsividad) --- */
+@media screen and (min-width: 800px) {
+  #mods-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (min-width: 1000px) {
+  #mods-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 4 Columnas */
+@media screen and (min-width: 1300px) {
+  #mods-container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

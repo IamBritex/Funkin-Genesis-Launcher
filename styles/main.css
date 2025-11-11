@@ -1,0 +1,9 @@
+/* styles/main.css */
+/* Este archivo importa todos los parciales en el orden correcto. */
+
+@import url('00_base.css');
+@import url('01_layout.css');
+@import url('02_components.css');
+@import url('03_views.css');
+@import url('04_modals.css');
+@import url('05_utilities.css');

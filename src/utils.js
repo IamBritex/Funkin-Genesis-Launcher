@@ -18,11 +18,46 @@ const utils = {
   },
 
   /**
-   * Inicializa los listeners de sonido globales.
+   * ¡CAMBIO! Inicializa los listeners de sonido globales Y el listener de 'Escape'.
    */
   initUtils: () => {
     window.addEventListener('mousedown', () => utils.playSound('down'));
     window.addEventListener('mouseup', () => utils.playSound('up'));
+
+    // ¡NUEVO! Listener para la tecla Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        // 1. Cerrar el popup de versión si está abierto
+        if (!dom.versionPopup.classList.contains('hidden')) {
+          dom.versionPopup.classList.add('hidden');
+          utils.playSound('close'); // Tocar sonido de cierre
+          return; // Salir para no cerrar un modal también
+        }
+
+        // 2. Cerrar modales (el de confirmación tiene más prioridad)
+        if (!dom.modalConfirm.classList.contains('hidden')) {
+          utils.closeModal(dom.modalConfirm);
+          // Si es un modal de confirmación, simular un "No"
+          if (state.pendingDeleteData) {
+            state.pendingDeleteData = null;
+          }
+          return;
+        }
+        if (!dom.modalConfig.classList.contains('hidden')) {
+          utils.closeModal(dom.modalConfig);
+          return;
+        }
+        if (!dom.manageVersionsModal.classList.contains('hidden')) {
+          utils.closeModal(dom.manageVersionsModal);
+          return;
+        }
+        // Opcional: Cerrar modal de carga (lo dejaremos comentado por ahora)
+        // if (!dom.modalLoading.classList.contains('hidden')) {
+        //   utils.closeModal(dom.modalLoading);
+        //   return;
+        // }
+      }
+    });
   },
   
   /**
@@ -59,6 +94,8 @@ const utils = {
    * Muestra un mensaje toast.
    */
   showToast: (message, isError = false) => {
+    utils.hideLoadingToast(); 
+    
     clearTimeout(toastTimer);
     dom.toastMessage.textContent = message;
     
@@ -74,10 +111,41 @@ const utils = {
     }
 
     dom.toast.classList.add('show');
+    dom.toast.classList.remove('loading'); // Asegurarse de que no sea un toast de carga
+    
     toastTimer = setTimeout(() => {
       dom.toast.classList.remove('show');
     }, 2900);
   },
+
+  /**
+   * Muestra un toast de carga persistente.
+   */
+  showLoadingToast: (message) => {
+    clearTimeout(toastTimer);
+    toastTimer = null; // Indicar que es un toast de carga
+    
+    dom.toastMessage.textContent = message;
+
+    const icon = dom.toast.querySelector('i');
+    icon.className = 'fas fa-spinner fa-spin'; 
+    dom.toast.style.borderColor = 'var(--color-grey-light)'; 
+    icon.style.color = 'var(--color-grey-light)'; 
+
+    dom.toast.classList.add('show');
+    dom.toast.classList.add('loading'); // Añadir clase 'loading'
+  },
+
+  /**
+   * Oculta el toast (usado para el de carga).
+   */
+  hideLoadingToast: () => {
+    if (dom.toast.classList.contains('loading')) {
+      dom.toast.classList.remove('show');
+      dom.toast.classList.remove('loading');
+    }
+  },
+
 
   /**
    * Abre un elemento modal.

@@ -1,0 +1,216 @@
+/* styles/02_components.css */
+
+/* --- ESTILOS DE CURSOR PERSONALIZADO --- */
+body.custom-cursor-enabled{cursor:url('cursor/cursor-default.png') 1 1,auto}
+body.custom-cursor-enabled a,body.custom-cursor-enabled button,body.custom-cursor-enabled .install-item,body.custom-cursor-enabled .close-button,body.custom-cursor-enabled .modal-icon-preview,body.custom-cursor-enabled .action-btn,body.custom-cursor-enabled .resizer,body.custom-cursor-enabled .switch,body.custom-cursor-enabled .version-selector{cursor:url('cursor/cursor-pointer.png') 1 1,pointer}
+body.custom-cursor-enabled .add-mod-card{cursor:url('cursor/cursor-pointer.png') 1 1,pointer}
+body.custom-cursor-enabled .mod-kebab-btn, body.custom-cursor-enabled .mod-menu-action {cursor:url('cursor/cursor-pointer.png') 1 1,pointer}
+/* ¡NUEVO! */
+body.custom-cursor-enabled #add-mod-header-btn {cursor:url('cursor/cursor-pointer.png') 1 1,pointer}
+
+
+/* --- ESTILOS DE BARRA DE PROGRESO DE DESCARGA --- */
+#download-progress-bar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.8em 3em;
+  background-color: var(--color-grey-dark);
+  border-top: 1px solid var(--color-grey-mid);
+  flex-shrink: 0;
+}
+#download-status-text {
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  opacity: 0.8;
+}
+#download-progress-bar-container .progress-bar-container {
+  flex-grow: 1;
+  height: 15px;
+  margin: 0;
+  background-color: var(--color-grey-light);
+  border: 1px solid var(--color-grey-mid);
+  border-radius: 10px;
+  overflow: hidden;
+}
+#download-progress-bar-container .progress-bar-fill {
+  width: 0%;
+  height: 100%;
+  background-color: var(--color-accent);
+  transition: width 0.3s ease;
+}
+
+.download-progress-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  min-width: 140px;
+  text-align: right;
+}
+#download-percent-text {
+  font-size: 0.9em;
+  font-weight: bold;
+}
+#download-size-text {
+  font-size: 0.8em;
+  opacity: 0.7;
+  min-height: 1.2em;
+}
+
+/* --- ESTILOS SELECTOR DE VERSIÓN --- */
+.version-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  background-color: var(--color-black);
+  border: 1px solid var(--color-grey-mid);
+  padding: 0.5em 0.8em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  box-sizing: border-box; 
+}
+.version-selector:hover { border-color: var(--color-accent); }
+.version-selector .engine-icon { 
+  width: 32px; 
+  height: 32px; 
+  border-radius: 4px;
+}
+.version-selector-info { display: flex; flex-direction: column; }
+#footer-engine-name { font-size: 1.1em; font-weight: bold; color: var(--color-white); }
+#footer-version-number { font-size: 0.9em; color: var(--color-grey-light); }
+.version-selector i { margin-left: 0.5em; color: var(--color-grey-light); }
+
+.content-footer #play-btn{width:auto;padding:.8em 1.5em;font-size:1.1em;font-weight:bold;background-color:var(--color-accent);color:var(--color-accent-text);border-color:var(--color-accent);margin-bottom:0}
+.content-footer #play-btn:hover{filter:brightness(1.2)}
+.content-footer #play-btn:disabled{background-color:var(--color-grey-light);color:var(--color-grey-mid);border-color:var(--color-grey-light);filter:none}
+
+
+/* --- ESTILOS ADVERTENCIA OS --- */
+.play-button-container {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+.os-warning {
+  position: relative;
+  color: #f39c12;
+  font-size: 1.5em;
+  cursor: help;
+  opacity: 0.8;
+}
+.os-warning #os-warning-tooltip {
+  visibility: hidden;
+  width: 220px;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 5100;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -110px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.7em;
+  border: 1px solid var(--color-grey-mid);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  white-space: normal;
+}
+.os-warning:hover #os-warning-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* --- ESTILOS POPUP DE VERSIÓN --- */
+#version-popup {
+  position: absolute;
+  background-color: var(--color-black);
+  border: 1px solid var(--color-grey-mid);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+  z-index: 5000;
+  max-height: 250px;
+  overflow-y: auto;
+  box-sizing: border-box; 
+}
+.version-popup-item {
+  padding: 0.8em 1em;
+  color: var(--color-white);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-grey-mid);
+  font-weight: 500;
+  text-align: left; 
+  white-space: nowrap; 
+}
+.version-popup-item:last-child { border-bottom: none; }
+.version-popup-item:hover { background-color: var(--color-grey-mid); }
+.version-popup-item.active {
+  background-color: var(--color-accent);
+  color: var(--color-accent-text);
+  font-weight: bold;
+}
+.version-popup-item.non-native {
+  color: var(--color-grey-light);
+  font-style: italic;
+}
+.version-popup-item.non-native:hover {
+  color: var(--color-white);
+}
+
+/* --- ESTILOS SWITCH --- */
+.switch{position:relative;display:inline-block;width:50px;height:28px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--color-grey-light);transition:.4s}
+.slider:before{position:absolute;content:"";height:20px;width:20px;left:4px;bottom:4px;background-color:var(--color-white);transition:.4s}
+input:checked + .slider{background-color:var(--color-accent)}
+input:checked + .slider:before{transform:translateX(22px);background-color:var(--color-accent-text)}
+.slider.round{border-radius:34px}
+.slider.round:before{border-radius:50%}
+
+/* --- ESTILOS TOAST (Modificados) --- */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(100%); }
+  15% { opacity: 1; transform: translateX(0); }
+  85% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+
+#toast {
+  position: fixed;
+  top: 50px; 
+  right: 20px;
+  background-color: var(--color-grey-dark);
+  color: var(--color-white);
+  border: 1px solid var(--color-accent);
+  padding: 1em 1.5em;
+  border-radius: 8px;
+  z-index: 4000; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .5);
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  max-width: 300px;
+}
+#toast.show {
+  opacity: 1;
+  animation: fadeInOut 3s ease-out forwards;
+}
+#toast.loading {
+  animation: none;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#toast i {
+  margin-right: .8em;
+  font-size: 1.2em;
+}

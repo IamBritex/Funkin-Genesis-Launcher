@@ -27,11 +27,17 @@ module.exports = {
   engineList: document.getElementById('engine-list'),
   configBtn: document.getElementById('config-btn'),
   manageVersionsBtn: document.getElementById('manage-versions-btn'),
-  modsBtn: document.getElementById('mods-btn'), // ¡NUEVO!
+  modsBtn: document.getElementById('mods-btn'), 
   
   // Contenido Principal
   newsContainer: document.getElementById('news-container'),
-  modsContainer: document.getElementById('mods-container'), // ¡NUEVO!
+  modsContainer: document.getElementById('mods-container'), 
+  
+  // ¡NUEVO! Cabecera de Mods
+  modsHeader: document.getElementById('mods-header'),
+  searchInput: document.getElementById('search-input'),
+  searchIcon: document.getElementById('search-icon'),
+  addModHeaderBtn: document.getElementById('add-mod-header-btn'),
   
   // Otros
   toast: document.getElementById('toast'),

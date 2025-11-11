@@ -2,6 +2,7 @@
 const { ipcRenderer } = require('electron');
 const dom = require('./dom');
 const state = require('./state');
+// ¡CAMBIO! Importar showToast
 const { getFileUrl, openModal, closeModal, showToast } = require('./utils');
 
 function addManageModalListeners() {
@@ -26,7 +27,7 @@ function addManageModalListeners() {
         showToast('La función de editar estará disponible próximamente.');
       } else if (action === 'delete') {
         state.pendingDeleteData = {
-          type: 'delete-version',
+          type: 'delete-version', // Tipo para el modal
           engine: engineKey,
           v: version,
           elementToRemove: versionItem
@@ -53,7 +54,6 @@ async function populateManageVersionsModal() {
       const engineGroup = document.createElement('div');
       engineGroup.className = 'engine-group collapsed';
       
-      // ¡CAMBIO! Decide si usar getFileUrl (para paths) o usar el dato (para base64)
       const iconUrl = engine.icon_is_path 
         ? getFileUrl(engine.icon) 
         : (engine.icon || state.defaultIconUrl);
@@ -105,18 +105,42 @@ function initManageVersionsModal() {
   });
 }
 
+/**
+ * ¡CAMBIO! Ahora maneja tanto 'delete-version' como 'delete-mod'.
+ */
 function initConfirmModalListeners() {
-  dom.confirmYesBtn.addEventListener('click', () => {
-    if (state.pendingDeleteData) {
-      if (state.pendingDeleteData.type === 'delete-version') {
-        ipcRenderer.send('delete-install', {
-          engine: state.pendingDeleteData.engine,
-          v: state.pendingDeleteData.v
-        });
+  dom.confirmYesBtn.addEventListener('click', async () => {
+    if (!state.pendingDeleteData) return;
+
+    const data = state.pendingDeleteData;
+    
+    if (data.type === 'delete-version') {
+      // Lógica existente para borrar VERSIONES
+      ipcRenderer.send('delete-install', {
+        engine: data.engine,
+        v: data.v
+      });
+      // (La lógica de UI para esto está en src/ipc.js)
+
+    } else if (data.type === 'delete-mod') {
+      // ¡NUEVA Lógica para borrar MODS!
+      try {
+        const result = await ipcRenderer.invoke('mods:delete-mod', data.folderName);
+        if (result.success) {
+          showToast(`Mod "${data.cardElement.dataset.title}" borrado con éxito.`);
+          data.cardElement.remove(); // Elimina la tarjeta de la UI
+        } else {
+          showToast(result.error, true);
+        }
+      } catch (err) {
+        showToast(`Error al borrar mod: ${err.message}`, true);
       }
     }
+    
+    state.pendingDeleteData = null; // Limpiar
     closeModal(dom.modalConfirm);
   });
+
   dom.confirmNoBtn.addEventListener('click', () => {
     state.pendingDeleteData = null; // Limpiar si cancela
     closeModal(dom.modalConfirm);

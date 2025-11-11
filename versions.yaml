@@ -1,12 +1,4 @@
-# -----------------------------------------------------------------
-#  Definición de Motores de FNF para Genesis Launcher
-# -----------------------------------------------------------------
-#  'icon_base64' debe ser la cadena de texto completa generada
-#  (ej. 'data:image/png;base64,iVBORw0KGgoAAA...').
-# -----------------------------------------------------------------
-
 engines:
-  # --- Motor: V-Slice ---
   - id: V-Slice
     name: "V-Slice"
     icon_path: "icons/versions/vanilla.svg"
@@ -77,7 +69,6 @@ engines:
           windows: "https://github.com/FunkinCrew/Funkin/releases/download/v0.3.3/funkin-windows-64.zip"
           linux: "https://github.com/FunkinCrew/Funkin/releases/download/v0.3.3/funkin-linux-64.zip"
 
-  # --- Motor: Psych Engine ---
   - id: psych
     name: "Psych Engine"
     icon_path: "icons/versions/psych.svg"
@@ -99,10 +90,7 @@ engines:
         download_urls:
           windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.2/PsychEngine-Windows64.zip"
           linux: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.2/PsychEngine-Linux.zip"
-      # ... (He omitido el resto de versiones de Psych por brevedad,
-      #      puedes copiarlas del YAML de la respuesta anterior)
 
-  # --- Motor: Codename Engine ---
   - id: codee
     name: "Codename Engine"
     icon_path: "icons/versions/code.svg"

@@ -1,0 +1,178 @@
+/* styles/04_modals.css */
+
+/* --- ESTILOS MODAL (Overlay) --- */
+.blur-overlay{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  z-index:1000;
+  display:flex;justify-content:center;align-items:center;
+  animation:blurFadeIn .2s ease-out forwards
+}
+.blur-overlay.closing{animation:blurFadeOut .2s ease-in forwards}
+.modal-container{visibility:hidden;opacity:0}
+.modal-container.hidden{display:none}
+.modal-container:not(.hidden){display:flex;visibility:visible;opacity:1}
+.modal{background-color:var(--color-grey-dark);border:1px solid var(--color-grey-mid);border-radius:10px;padding:2em;width:90%;max-width:400px;box-shadow:0 5px 20px rgba(0,0,0,.5);position:relative;text-align:center;animation:modalOpen .2s cubic-bezier(.175,.885,.32,1.275) forwards}
+.modal-container.closing .modal{animation:modalClose .2s ease-in forwards}
+.close-button{position:absolute;top:10px;right:15px;font-size:1.8em;font-weight:bold;color:var(--color-white);cursor:pointer;line-height:1}
+.close-button:hover{color:var(--color-grey-light)}
+
+/* Estilos de Formulario (reducido) */
+.form-input,.form-select{width:100%;padding:.8em;box-sizing:border-box;background-color:var(--color-grey-mid);color:var(--color-white);border:1px solid var(--color-grey-light);border-radius:5px;font-size:1em}
+.form-select:disabled{background-color:var(--color-grey-dark);color:var(--color-grey-light);border-color:var(--color-grey-mid)}
+
+/* --- ESTILOS LOADING MODAL --- */
+#loading-overlay{
+  z-index:2000;
+}
+#loading-overlay .modal { max-width: 300px; }
+#loading-status{ 
+  font-size: 1.2em;
+  font-weight: 500;
+  text-align: center;
+  white-space: normal;
+  color: var(--color-white);
+}
+
+/* --- ESTILOS CONFIRM MODAL --- */
+#modal-confirm {
+  z-index: 3000;
+}
+.confirm-modal{max-width:420px}
+.confirm-modal h2{margin-top:0}
+.confirm-modal p{color:var(--color-white);opacity:.85;line-height:1.5;font-size:1.1em}
+.confirm-actions{display:flex;justify-content:flex-end;gap:1em;margin-top:1.5em}
+.confirm-actions .nav-button{font-weight:bold;margin-bottom:0;flex-grow:1}
+.confirm-yes{background-color:var(--color-accent);color:var(--color-accent-text);border-color:var(--color-accent)}
+.confirm-yes:hover{background-color:var(--color-green-hover);border-color:var(--color-green-hover);color:var(--color-white)}
+.confirm-no{background-color:transparent;color:var(--color-white);border-color:var(--color-grey-mid)}
+.confirm-no:hover{background-color:var(--color-red-hover);border-color:var(--color-red-hover);color:var(--color-white)}
+
+/* --- ESTILOS CONFIG MODAL --- */
+.config-modal{max-width:500px;text-align:left}
+.config-modal h2{text-align:center;margin-top:0}
+.config-option{display:flex;justify-content:space-between;align-items:center;padding:1em;margin-bottom:.5em;background-color:var(--color-black);border:1px solid var(--color-grey-mid);border-radius:6px}
+.config-option label{font-weight:500}
+.config-option .form-select{width:150px}
+
+/* --- Estilos para el Modal de Gestión --- */
+.manage-versions-modal {
+  max-width: 600px;
+  text-align: left;
+}
+.manage-versions-modal h2 {
+  text-align: center;
+  margin-top: 0;
+}
+.manage-versions-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-top: 1em;
+  border: 1px solid var(--color-grey-mid);
+  border-radius: 6px;
+  background-color: var(--color-black);
+}
+.engine-group {
+  border-bottom: 1px solid var(--color-grey-mid);
+}
+.engine-group:last-child {
+  border-bottom: none;
+}
+.engine-header {
+  display: flex;
+  align-items: center;
+  padding: 0.8em 1em;
+  cursor: pointer;
+  background-color: var(--color-grey-dark);
+  transition: background-color 0.2s;
+  position: sticky; 
+  top: 0;
+  z-index: 10;
+}
+.engine-header:hover {
+  background-color: var(--color-grey-mid);
+}
+.engine-header img {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  margin-right: 0.8em;
+}
+.engine-header span {
+  font-weight: bold;
+  font-size: 1.1em;
+  flex-grow: 1;
+}
+.engine-header .collapse-icon {
+  transition: transform 0.3s ease;
+  margin-left: 1em;
+}
+.engine-group.collapsed .collapse-icon {
+  transform: rotate(-90deg);
+}
+
+.version-list {
+  max-height: 1000px; 
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+.engine-group.collapsed .version-list {
+  max-height: 0;
+}
+
+.version-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8em 1em 0.8em 2em;
+  border-top: 1px solid var(--color-grey-mid);
+  position: relative;
+}
+.version-item-name {
+  padding-left: 1em;
+  position: relative;
+}
+.version-item-name::before {
+  content: '|-';
+  position: absolute;
+  left: -0.5em;
+  top: 0;
+  color: var(--color-grey-light);
+}
+
+.version-actions {
+  display: flex;
+  gap: 0.5em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.version-item:hover .version-actions {
+  opacity: 1;
+}
+.action-btn {
+  background: var(--color-grey-mid);
+  border: none;
+  color: var(--color-white);
+  width: 32px;
+  height: 32px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s, color 0.2s;
+}
+.action-btn:hover {
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+}
+.action-btn.delete:hover {
+  background: var(--color-red-hover);
+  color: var(--color-white);
+}
+.action-btn[title="Editar (Próximamente)"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.action-btn[title="Editar (Próximamente)"]:hover {
+  background: var(--color-grey-mid);
+  color: var(--color-white);
+}

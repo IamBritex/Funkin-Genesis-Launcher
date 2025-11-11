@@ -1,0 +1,60 @@
+/* styles/00_base.css */
+
+/* --- DEFINICIÓN DE TEMAS --- */
+:root,
+body[data-theme="funkin"] {
+  --color-black: #111;
+  --color-white: #f1f2f4;
+  --color-grey-dark: #222;
+  --color-grey-mid: #3f485a;
+  --color-grey-light: #636d83;
+  --color-accent: #fa6bbe;
+  --color-accent-text: #111;
+  --color-red-hover: #e53935;
+  --color-green-hover: #43a047;
+  --color-toast-icon: #4CAF50;
+  --color-link: #fa6bbe;
+  
+  /* ¡NUEVO! Variable RGB para el blur */
+  --color-black-rgb: 17, 17, 17;
+}
+body[data-theme="black-white"]{--color-black:#000;--color-white:#fff;--color-grey-dark:#111;--color-grey-mid:#222;--color-grey-light:#333;--color-accent:#fff;--color-accent-text:#000;--color-red-hover:#e53935;--color-green-hover:#43a047;--color-toast-icon:#4CAF50;--color-link:#00bcd4; --color-black-rgb: 0, 0, 0;}
+body[data-theme="light"]{--color-black:#f0f0f0;--color-white:#111;--color-grey-dark:#fff;--color-grey-mid:#ddd;--color-grey-light:#ccc;--color-accent:#007bff;--color-accent-text:#fff;--color-red-hover:#e53935;--color-green-hover:#43a047;--color-toast-icon:#4CAF50;--color-link:#007bff; --color-black-rgb: 240, 240, 240;}
+body[data-theme="high-contrast"]{--color-black:#000;--color-white:#fff;--color-grey-dark:#000;--color-grey-mid:#333;--color-grey-light:#555;--color-accent:#00ff00;--color-accent-text:#000;--color-red-hover:#ff0000;--color-green-hover:#00ff00;--color-toast-icon:#00ff00;--color-link:#00ff00; --color-black-rgb: 0, 0, 0;}
+
+/* --- ESTILOS DE SCROLLBAR --- */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--color-grey-dark); border-radius: 5px; }
+::-webkit-scrollbar-thumb { background: var(--color-grey-light); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-grey-mid); }
+
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  cursor: default;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.hidden { display: none !important; }
+
+.app-layout { 
+  display: flex; 
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+/* --- ANIMACIONES DE MODAL --- */
+@keyframes modalOpen{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes modalClose{from{transform:translateY(0);opacity:1}to{transform:translateY(50px);opacity:0}}
+@keyframes blurFadeIn{from{backdrop-filter:blur(0px);background-color:rgba(0,0,0,0)}to{backdrop-filter:blur(5px);background-color:rgba(0,0,0,.5)}}
+@keyframes blurFadeOut{from{backdrop-filter:blur(5px);background-color:rgba(0,0,0,.5)}to{backdrop-filter:blur(0px);background-color:rgba(0,0,0,0)}}
