@@ -9,11 +9,14 @@ const { getFileUrl } = require('./utils');
  */
 async function updateFooterState(versionString) {
   const engineId = state.currentSelectedEngineKey;
-  if (!engineId || !versionString || !state.versionsData.engines) {
+  
+  // ¡CAMBIO! Lógica de "Error" modificada.
+  // Ahora, si versionString es nulo, SÍ mostramos el nombre del motor.
+  if (!engineId || !state.versionsData.engines) {
     dom.playButton.disabled = true;
     dom.footerEngineName.textContent = "Error";
     dom.footerVersionNumber.textContent = '...';
-    dom.osWarningIcon.classList.add('hidden'); // Asegurarse de ocultarlo en error
+    dom.osWarningIcon.classList.add('hidden');
     return;
   }
   
@@ -22,6 +25,24 @@ async function updateFooterState(versionString) {
     dom.playButton.disabled = true;
     return;
   }
+  
+  // Si no hay versionString (porque el motor no tiene versiones)
+  if (!versionString) {
+    dom.footerEngineName.textContent = engineData.name;
+    dom.footerVersionNumber.textContent = '---';
+    dom.playButtonText.textContent = 'No disponible';
+    dom.playButton.disabled = true;
+    dom.osWarningIcon.classList.remove('hidden'); // Muestra la advertencia
+    
+    const footerIconData = engineData.icon_path 
+      ? getFileUrl(engineData.icon_path) 
+      : (engineData.icon_base64 || state.defaultIconUrl);
+    dom.footerEngineIcon.src = footerIconData;
+    
+    return;
+  }
+  
+  // --- Si hay una versionString, continuamos ---
   
   state.currentSelectedVersion = versionString;
   const versionData = engineData.versions.find(v => v.version === versionString);
@@ -58,8 +79,8 @@ async function updateFooterState(versionString) {
   
   state.selectedInstall.isDownloaded = isDownloaded;
   
-  // ¡¡¡CAMBIO CLAVE!!!
-  // Esta es la lógica que SÍ funciona
+  // Esta es la lógica que SÍ funciona y que ahora se ejecutará
+  // incluso para versiones no nativas.
   const hasNative = versionData.download_urls[state.currentOS];
   
   if (hasNative) {
@@ -82,23 +103,30 @@ function populateVersionPopup(engineId) {
   dom.versionPopupList.innerHTML = '';
   const engine = state.versionsData.engines.find(e => e.id === engineId);
   
-  // ¡CAMBIO! Filtra solo por versiones NATIVAS
-  const compatibleVersions = engine.versions
-    .filter(version => version.download_urls[state.currentOS]) // <-- Lógica corregida
+  // ¡CAMBIO! Ya no se filtra por versiones nativas.
+  const allVersions = engine.versions
     .sort((a, b) => {
+      // Ordenar de más nueva a más vieja
       const vA = a.version.replace(/[^0-9.]/g, ''); 
       const vB = b.version.replace(/[^0-9.]/g, '');
       return vB.localeCompare(vA, undefined, { numeric: true });
     });
 
-  compatibleVersions.forEach(version => {
+  allVersions.forEach(version => {
     const item = document.createElement('div');
     item.className = 'version-popup-item';
     item.dataset.version = version.version;
     item.textContent = version.version;
     
+    // ¡NUEVO! Comprobar compatibilidad y añadir clase si no es nativa
+    const hasNative = version.download_urls[state.currentOS];
+    if (!hasNative) {
+      item.classList.add('non-native');
+    }
+    
     item.addEventListener('click', (e) => {
       e.stopPropagation();
+      // ¡CAMBIO! Llama a updateFooterState sin importar la compatibilidad
       updateFooterState(version.version);
       dom.versionPopup.classList.add('hidden');
     });
@@ -142,23 +170,20 @@ function selectEngine(engineId) {
   
   populateVersionPopup(engineId);
   
-  // ¡CAMBIO! Seleccionar la última versión NATIVA compatible
+  // ¡CAMBIO! Seleccionar la última versión (la más nueva) sin importar la compatibilidad.
   const latestVersion = engineData.versions
-    .filter(v => v.download_urls[state.currentOS]) // <-- Lógica corregida
     .sort((a, b) => {
       const vA = a.version.replace(/[^0-9.]/g, '');
       const vB = b.version.replace(/[^0-9.]/g, '');
       return vB.localeCompare(vA, undefined, { numeric: true });
-    })[0]?.version;
+    })[0]?.version; // Quitado el .filter()
 
   if (latestVersion) {
     updateFooterState(latestVersion);
   } else {
-    // Si no hay ninguna versión nativa, llama a updateFooterState con null
+    // Si no hay ninguna versión (lista vacía), llama a updateFooterState con null
     // para que muestre el estado deshabilitado.
     updateFooterState(null); 
-    dom.footerEngineName.textContent = engineData.name;
-    dom.footerVersionNumber.textContent = '---';
   }
 }
 
@@ -190,19 +215,31 @@ function populateEngineList() {
       <span class="install-name">${engine.name}</span>
     `;
     
-    // ¡CAMBIO! Comprueba solo compatibilidad NATIVA
-    const hasCompatibleVersion = engine.versions.some(v => v.download_urls[state.currentOS]); // <-- Lógica corregida
+    // ¡CAMBIO! Esta lógica se mantiene, pero ahora no deshabilita el motor
+    // si solo tiene versiones no-nativas. (Corrección: No, la lógica anterior estaba bien,
+    // si un motor NO tiene NINGUNA versión nativa, está bien deshabilitarlo en la sidebar).
+    // Re-evaluación: El usuario quiere ver todo. Quitemos la deshabilitación basada en OS.
     
-    if (!hasCompatibleVersion) {
-      item.classList.add('disabled');
-    } else if (!firstEnabledEngine) {
+    // const hasCompatibleVersion = engine.versions.some(v => v.download_urls[state.currentOS]);
+    
+    // if (!hasCompatibleVersion) {
+    //   item.classList.add('disabled');
+    // } else if (!firstEnabledEngine) {
+    //   firstEnabledEngine = engine.id;
+    // }
+    
+    // ¡CAMBIO! Lógica simplificada: no deshabilitar motores,
+    // solo seleccionar el primero de la lista.
+    if (!firstEnabledEngine) {
       firstEnabledEngine = engine.id;
     }
     
     item.addEventListener('click', () => {
-      if (!item.classList.contains('disabled')) {
-        selectEngine(engine.id);
-      }
+      // ¡CAMBIO! Permitir seleccionar motores deshabilitados (si los hubiera)
+      // if (!item.classList.contains('disabled')) {
+      //   selectEngine(engine.id);
+      // }
+      selectEngine(engine.id);
     });
     dom.engineList.appendChild(item);
   });
@@ -210,7 +247,7 @@ function populateEngineList() {
   if (firstEnabledEngine) {
     selectEngine(firstEnabledEngine);
   } else {
-    dom.footerEngineName.textContent = "No hay motores compatibles";
+    dom.footerEngineName.textContent = "No hay motores disponibles";
     dom.playButton.disabled = true;
   }
 }
