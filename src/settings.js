@@ -18,6 +18,7 @@ function saveSettings() {
   state.appSettings.autoLaunch = dom.launchToggle.checked;
   state.appSettings.soundEffects = dom.soundToggle.checked;
   state.appSettings.customCursor = dom.cursorToggle.checked;
+  // modVisibility se guarda automáticamente porque es parte de state.appSettings
   ipcRenderer.send('save-settings', state.appSettings);
   applyTheme(state.appSettings.theme);
   applyCursor(state.appSettings.customCursor);
@@ -26,6 +27,12 @@ function saveSettings() {
 async function loadSettings() {
   try {
     state.appSettings = await ipcRenderer.invoke('load-settings');
+    
+    // ¡CAMBIO! Asegurarse de que modVisibility exista
+    if (!state.appSettings.modVisibility) {
+      state.appSettings.modVisibility = {};
+    }
+
     dom.themeSelect.value = state.appSettings.theme;
     dom.languageSelect.value = state.appSettings.language;
     dom.launchToggle.checked = state.appSettings.autoLaunch;

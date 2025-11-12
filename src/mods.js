@@ -63,8 +63,9 @@ function createModCard(mod) {
   // 3. Definir la versión
   const versionString = mod.version ? `<span class="mod-version">v${mod.version}</span>` : '';
 
-  // 4. Definir estado de visibilidad (por ahora solo visual)
-  const isVisible = mod.visible !== false; // Asumir true si no está definido
+  // 4. ¡CAMBIO! Definir estado de visibilidad leyendo de settings
+  // Asumir true (visible) si no está definido (undefined)
+  const isVisible = state.appSettings.modVisibility[mod.folderName] !== false; 
   const cardClasses = isVisible ? "mod-card" : "mod-card disabled";
   const visibleButtonText = isVisible 
     ? '<i class="fas fa-eye"></i> Visible' 
@@ -173,16 +174,25 @@ function addModCardListeners() {
         showToast('La función "Modificar" no está implementada aún.');
       
       } else if (action === 'toggle-visible') {
+        // ¡CAMBIOS! Guardar el estado de visibilidad
         const isDisabling = !card.classList.contains('disabled');
         card.classList.toggle('disabled');
         
+        // 1. Actualizar el estado global
+        state.appSettings.modVisibility[folderName] = !isDisabling;
+        
+        // 2. Enviar los settings actualizados al proceso principal para guardar
+        ipcRenderer.send('save-settings', state.appSettings);
+        
+        // 3. Actualizar UI del botón
         if (isDisabling) {
           e.currentTarget.innerHTML = '<i class="fas fa-eye-slash"></i> Oculto';
         } else {
           e.currentTarget.innerHTML = '<i class="fas fa-eye"></i> Visible';
         }
         
-        showToast(`Visibilidad de "${title}" cambiada (solo visual).`, false);
+        // 4. Mostrar toast (quitamos "solo visual")
+        showToast(`Visibilidad de "${title}" guardada.`, false);
 
       } else if (action === 'delete') {
         state.pendingDeleteData = {

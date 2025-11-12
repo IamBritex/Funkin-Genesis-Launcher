@@ -15,7 +15,8 @@ const DEFAULT_SETTINGS = {
   language: 'es',
   autoLaunch: true,
   soundEffects: true,
-  customCursor: true
+  customCursor: true,
+  modVisibility: {} // ¡NUEVO!
 };
 
 module.exports = {

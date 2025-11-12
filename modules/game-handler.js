@@ -5,7 +5,8 @@ const fs = require('fs');
 const https = require('https');
 const AdmZip = require('adm-zip');
 const { execFile } = require('child_process');
-const { VERSIONS_DIR, MODS_DIR } = require('./constants');
+// ¡CAMBIO! Importar SETTINGS_FILE y DEFAULT_SETTINGS
+const { VERSIONS_DIR, MODS_DIR, SETTINGS_FILE, DEFAULT_SETTINGS } = require('./constants');
 
 let mainWindow; // Referencia a la ventana principal
 
@@ -91,34 +92,68 @@ function executeGame(installPath, exeName) {
   });
 }
 
-// --- FUNCIÓN DE SYMLINK ---
-function createModSymlink(installPath) {
-  try {
-    const installModsPath = path.join(installPath, 'mods');
-    const linkType = process.platform === 'win32' ? 'junction' : 'dir';
+// --- ¡NUEVA FUNCIÓN DE SYMLINK! ---
+/**
+ * Crea symlinks filtrados en la carpeta de instalación del juego.
+ * Lee settings.json para determinar qué mods excluir.
+ */
+function createFilteredModSymlinks(installPath) {
+  const installModsPath = path.join(installPath, 'mods');
+  const linkType = process.platform === 'win32' ? 'junction' : 'dir';
 
+  try {
+    // 1. Cargar el estado de visibilidad desde settings.json
+    let modVisibility = DEFAULT_SETTINGS.modVisibility;
+    try {
+      if (fs.existsSync(SETTINGS_FILE)) {
+        const settingsData = fs.readFileSync(SETTINGS_FILE, 'utf-8');
+        // Asegurarse de que modVisibility exista, si no, usar el default
+        modVisibility = JSON.parse(settingsData).modVisibility || DEFAULT_SETTINGS.modVisibility;
+      }
+    } catch (e) {
+      console.error('Error al leer settings.json para filtrar mods, usando defaults:', e.message);
+    }
+
+    // 2. Asegurar que el directorio de mods global exista
     fs.mkdirSync(MODS_DIR, { recursive: true });
 
-    let stats;
-    try {
-      stats = fs.lstatSync(installModsPath);
-    } catch (e) {
-      if (e.code !== 'ENOENT') throw e;
-      stats = null;
+    // 3. Limpiar la carpeta de mods de la instalación (si existe)
+    fs.rmSync(installModsPath, { recursive: true, force: true });
+    
+    // 4. Crear una *nueva carpeta* (no un symlink)
+    fs.mkdirSync(installModsPath, { recursive: true });
+
+    // 5. Leer todos los mods del directorio global
+    const allModFolders = fs.readdirSync(MODS_DIR, { withFileTypes: true })
+      .filter(dirent => dirent.isDirectory())
+      .map(dirent => dirent.name);
+
+    let linkedCount = 0;
+    // 6. Iterar y crear symlinks solo para los mods visibles
+    for (const folderName of allModFolders) {
+      // Es visible si es `true` o `undefined` (default). Solo se salta si es `false`.
+      const isVisible = modVisibility[folderName] !== false;
+
+      if (isVisible) {
+        const sourceModPath = path.join(MODS_DIR, folderName);
+        const targetModPath = path.join(installModsPath, folderName);
+        try {
+          fs.symlinkSync(sourceModPath, targetModPath, linkType);
+          linkedCount++;
+        } catch (linkErr) {
+          console.error(`Error creando symlink para ${folderName}: ${linkErr.message}`);
+        }
+      }
     }
 
-    if (stats) {
-      fs.rmSync(installModsPath, { recursive: true, force: true });
-    }
-
-    fs.symlinkSync(MODS_DIR, installModsPath, linkType);
-    console.log(`Symlink de mods creado en: ${installModsPath}`);
+    console.log(`Symlinks filtrados creados en: ${installModsPath} (${linkedCount}/${allModFolders.length} mods vinculados)`);
 
   } catch (err) {
-    console.error(`Error creando mod symlink en ${installPath}: ${err.message}`);
+    console.error(`Error fatal creando symlinks filtrados en ${installPath}: ${err.message}`);
     mainWindow.webContents.send('download-error', { error: `Error al vincular mods: ${err.message}` });
   }
 }
+
 
 // --- INICIALIZADOR ---
 function initGameHandler(win) {
@@ -139,7 +174,8 @@ function initGameHandler(win) {
     const wineExeExists = (isWin || isLinux) && fs.existsSync(wineExePath);
 
     if (fs.existsSync(installPath) && (nativeExeExists || wineExeExists)) {
-      createModSymlink(installPath);
+      // ¡CAMBIO! Llamar a la nueva función
+      createFilteredModSymlinks(installPath);
       mainWindow.webContents.send('game-ready', { name, path: installPath });
       executeGame(installPath, exeName);
     } else {
@@ -158,7 +194,8 @@ function initGameHandler(win) {
           const zip = new AdmZip(zipFilePath);
           zip.extractAllTo(installPath, true);
           fs.unlinkSync(zipFilePath);
-          createModSymlink(installPath);
+          // ¡CAMBIO! Llamar a la nueva función
+          createFilteredModSymlinks(installPath);
           mainWindow.webContents.send('download-complete', { name, path: installPath });
           if (autoLaunch) executeGame(installPath, exeName);
         } catch (err) { mainWindow.webContents.send('download-error', { error: `Error al descomprimir: ${err.message}` }); }
