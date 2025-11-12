@@ -11,7 +11,7 @@ engines:
       - version: "0.7.4"
         download_urls:
           windows: "https://github.com/FunkinCrew/Funkin/releases/download/v0.7.4/funkin-windows-64bit.zip"
-          #linux: "https://github.com/FunkinCrew/Funkin/releases/download/v0.7.4/funkin-linux-64bit.zip"
+          linux: "https://github.com/FunkinCrew/Funkin/releases/download/v0.7.4/funkin-linux-64bit.zip"
       - version: "0.7.3"
         download_urls:
           windows: "https://github.com/FunkinCrew/Funkin/releases/download/v0.7.3/funkin-windows-64bit.zip"
