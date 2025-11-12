@@ -96,9 +96,10 @@ function populateVersionPopup(engineId) {
   
   const allVersions = engine.versions
     .sort((a, b) => {
-      const vA = a.version.replace(/[^0-9.]/g, ''); 
-      const vB = b.version.replace(/[^0-9.]/g, '');
-      return vB.localeCompare(vA, undefined, { numeric: true });
+      // ¡CAMBIO! Eliminadas las líneas .replace()
+      // 'localeCompare' con 'numeric: true' ordena correctamente
+      // "1.0.1 - Latest" (más nuevo) antes que "1.0.1-rc2" (más viejo)
+      return b.version.localeCompare(a.version, undefined, { numeric: true });
     });
 
   allVersions.forEach(version => {
@@ -106,7 +107,7 @@ function populateVersionPopup(engineId) {
     item.className = 'version-popup-item';
     item.dataset.version = version.version;
     
-    // ¡CAMBIO! Volvemos a poner solo el texto.
+    // Volvemos a poner solo el texto.
     // El wrapper se añadirá dinámicamente si es necesario.
     item.textContent = version.version;
     
@@ -160,11 +161,10 @@ function selectEngine(engineId) {
   
   populateVersionPopup(engineId);
   
+  // ¡CAMBIO! Esta lógica ahora usará el ordenamiento corregido
   const latestVersion = engineData.versions
     .sort((a, b) => {
-      const vA = a.version.replace(/[^0-9.]/g, '');
-      const vB = b.version.replace(/[^0-9.]/g, '');
-      return vB.localeCompare(vA, undefined, { numeric: true });
+      return b.version.localeCompare(a.version, undefined, { numeric: true });
     })[0]?.version; 
 
   if (latestVersion) {
@@ -215,7 +215,7 @@ function populateEngineList() {
   if (firstEnabledEngine) {
     selectEngine(firstEnabledEngine);
   } else {
-    dom.footerEngineName.textContent = "No hay motores disponibles";
+    dom.footerEngineName.textContent = "No hay motores compatibles";
     dom.playButton.disabled = true;
   }
 }
@@ -244,7 +244,7 @@ function initVersionSelector() {
     
     dom.versionPopup.classList.toggle('hidden');
 
-    // ¡CAMBIO! Lógica de Marquee condicional
+    // Lógica de Marquee condicional
     // Solo se ejecuta si el popup se está mostrando
     if (!dom.versionPopup.classList.contains('hidden')) {
       
