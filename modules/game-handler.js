@@ -5,7 +5,6 @@ const fs = require('fs');
 const https = require('https');
 const AdmZip = require('adm-zip');
 const { execFile } = require('child_process');
-// ¡CAMBIO! Importar SETTINGS_FILE y DEFAULT_SETTINGS
 const { VERSIONS_DIR, MODS_DIR, SETTINGS_FILE, DEFAULT_SETTINGS } = require('./constants');
 
 let mainWindow; // Referencia a la ventana principal
@@ -66,16 +65,15 @@ function executeGame(installPath, exeName) {
     try { fs.chmodSync(finalExePath, 0o755); } catch (err) { /*...*/ }
   }
 
-  const windowBounds = mainWindow.getBounds();
-  mainWindow.hide();
+  mainWindow.minimize(); 
 
   const command = useWine ? 'wine' : finalExePath;
   const args = useWine ? [finalExePath] : [];
 
   const gameProcess = execFile(command, args, { cwd: installPath }, (error, stdout, stderr) => {
     if (mainWindow) {
-      mainWindow.setBounds(windowBounds);
-      mainWindow.show();
+      mainWindow.restore();
+      mainWindow.focus(); // <-- Devuelve el foco a la ventana
     }
     if (error) {
       console.error(`Error al ejecutar: ${error.message}`);
@@ -84,19 +82,15 @@ function executeGame(installPath, exeName) {
 
   gameProcess.on('error', (error) => {
     if (mainWindow) {
-      mainWindow.setBounds(windowBounds);
-      mainWindow.show();
+      mainWindow.restore();
+      mainWindow.focus(); // <-- Devuelve el foco a la ventana
     }
     const errorMsg = useWine ? `Error al iniciar con Wine (¿Está instalado?): ${error.message}` : `Error al iniciar: ${error.message}`;
     mainWindow.webContents.send('download-error', { error: errorMsg });
   });
 }
 
-// --- ¡NUEVA FUNCIÓN DE SYMLINK! ---
-/**
- * Crea symlinks filtrados en la carpeta de instalación del juego.
- * Lee settings.json para determinar qué mods excluir.
- */
+// --- FUNCIÓN DE SYMLINK FILTRADO ---
 function createFilteredModSymlinks(installPath) {
   const installModsPath = path.join(installPath, 'mods');
   const linkType = process.platform === 'win32' ? 'junction' : 'dir';
@@ -174,7 +168,6 @@ function initGameHandler(win) {
     const wineExeExists = (isWin || isLinux) && fs.existsSync(wineExePath);
 
     if (fs.existsSync(installPath) && (nativeExeExists || wineExeExists)) {
-      // ¡CAMBIO! Llamar a la nueva función
       createFilteredModSymlinks(installPath);
       mainWindow.webContents.send('game-ready', { name, path: installPath });
       executeGame(installPath, exeName);
@@ -194,7 +187,6 @@ function initGameHandler(win) {
           const zip = new AdmZip(zipFilePath);
           zip.extractAllTo(installPath, true);
           fs.unlinkSync(zipFilePath);
-          // ¡CAMBIO! Llamar a la nueva función
           createFilteredModSymlinks(installPath);
           mainWindow.webContents.send('download-complete', { name, path: installPath });
           if (autoLaunch) executeGame(installPath, exeName);
