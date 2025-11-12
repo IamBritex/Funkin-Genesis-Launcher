@@ -43,6 +43,11 @@ module.exports = {
   searchIcon: document.getElementById('search-icon'),
   addModHeaderBtn: document.getElementById('add-mod-header-btn'),
   
+  // ¡NUEVO! Filtro de Mods
+  filterModsBtn: document.getElementById('filter-mods-btn'),
+  filterDropdown: document.getElementById('filter-dropdown'),
+  filterDropdownList: document.getElementById('filter-dropdown-list'),
+  
   // Otros
   toast: document.getElementById('toast'),
   toastMessage: document.getElementById('toast-message'),

@@ -8,6 +8,7 @@ const state = {
   pendingDeleteData: null,
   currentSelectedEngineKey: null,
   currentSelectedVersion: null,
+  currentModFilter: 'all',
   
   // Constantes de UI
   minSidebarWidth: 180,

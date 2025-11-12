@@ -24,7 +24,26 @@ const utils = {
     window.addEventListener('mousedown', () => utils.playSound('down'));
     window.addEventListener('mouseup', () => utils.playSound('up'));
 
-    // ¡NUEVO! Listener para la tecla Escape
+    // ¡NUEVO! Listener de clic "fuera"
+    window.addEventListener('click', (e) => {
+      // Cierra el popup de versión si se hace clic fuera
+      if (!e.target.closest('#version-selector-button') && !e.target.closest('#version-popup')) {
+        if (!dom.versionPopup.classList.contains('hidden')) {
+          dom.versionPopup.classList.add('hidden');
+        }
+      }
+      
+      // ¡NUEVO! Cierra el popup de FILTRO si se hace clic fuera
+      if (!e.target.closest('#filter-mods-btn') && !e.target.closest('#filter-dropdown')) {
+        if (!dom.filterDropdown.classList.contains('hidden')) {
+          dom.filterDropdown.classList.add('hidden');
+          dom.filterModsBtn.classList.remove('active');
+        }
+      }
+    });
+
+
+    // Listener para la tecla Escape
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         // 1. Cerrar el popup de versión si está abierto
@@ -32,6 +51,14 @@ const utils = {
           dom.versionPopup.classList.add('hidden');
           utils.playSound('close'); // Tocar sonido de cierre
           return; // Salir para no cerrar un modal también
+        }
+        
+        // ¡NUEVO! Cerrar el popup de FILTRO si está abierto
+        if (!dom.filterDropdown.classList.contains('hidden')) {
+          dom.filterDropdown.classList.add('hidden');
+          dom.filterModsBtn.classList.remove('active');
+          utils.playSound('close');
+          return;
         }
 
         // 2. Cerrar modales (el de confirmación tiene más prioridad)
