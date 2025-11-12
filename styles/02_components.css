@@ -5,7 +5,6 @@ body.custom-cursor-enabled{cursor:url('cursor/cursor-default.png') 1 1,auto}
 body.custom-cursor-enabled a,body.custom-cursor-enabled button,body.custom-cursor-enabled .install-item,body.custom-cursor-enabled .close-button,body.custom-cursor-enabled .modal-icon-preview,body.custom-cursor-enabled .action-btn,body.custom-cursor-enabled .resizer,body.custom-cursor-enabled .switch,body.custom-cursor-enabled .version-selector{cursor:url('cursor/cursor-pointer.png') 1 1,pointer}
 body.custom-cursor-enabled .add-mod-card{cursor:url('cursor/cursor-pointer.png') 1 1,pointer}
 body.custom-cursor-enabled .mod-kebab-btn, body.custom-cursor-enabled .mod-menu-action {cursor:url('cursor/cursor-pointer.png') 1 1,pointer}
-/* ¡NUEVO! */
 body.custom-cursor-enabled #add-mod-header-btn {cursor:url('cursor/cursor-pointer.png') 1 1,pointer}
 
 
@@ -129,6 +128,17 @@ body.custom-cursor-enabled #add-mod-header-btn {cursor:url('cursor/cursor-pointe
   opacity: 1;
 }
 
+/* --- ¡NUEVO! Definición de la animación marquee --- */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    /* Mueve el contenedor el 50% de su propio ancho (que es el ancho de un solo span) */
+    transform: translateX(-50%);
+  }
+}
+
 /* --- ESTILOS POPUP DE VERSIÓN --- */
 #version-popup {
   position: absolute;
@@ -141,23 +151,62 @@ body.custom-cursor-enabled #add-mod-header-btn {cursor:url('cursor/cursor-pointe
   max-height: 250px;
   overflow-y: auto;
   box-sizing: border-box; 
+  overflow-x: hidden; 
 }
 .version-popup-item {
-  padding: 0.8em 1em;
   color: var(--color-white);
   cursor: pointer;
   border-bottom: 1px solid var(--color-grey-mid);
   font-weight: 500;
   text-align: left; 
   white-space: nowrap; 
+  overflow: hidden;
+  /* ¡CAMBIO! El padding se aplica aquí para los items cortos */
+  padding: 0.8em 1em; 
 }
+
+/* El wrapper solo existe en items largos y dinámicos */
+.marquee-wrapper {
+  display: flex; 
+  width: fit-content; 
+  /* ¡CAMBIO! Quitamos el padding de aquí, ya que el item padre lo tiene */
+}
+
+.marquee-wrapper span {
+  white-space: nowrap;
+  padding-right: 2em; /* Espacio entre el texto 1 y el texto 2 */
+}
+
+/* ¡CAMBIO! Cuando el item (corto) es hover, solo cambia el fondo */
+.version-popup-item:hover {
+  background-color: var(--color-grey-mid);
+}
+
+/* ¡CAMBIO! Cuando un wrapper (largo) es hover, se anima */
+.version-popup-item:hover .marquee-wrapper {
+  animation: marquee-scroll 5s linear infinite;
+  /* El fondo se hereda del hover del item */
+}
+
 .version-popup-item:last-child { border-bottom: none; }
-.version-popup-item:hover { background-color: var(--color-grey-mid); }
+
+/* ¡CAMBIO! El estado activo quita el padding y aplica estilos al wrapper si existe */
 .version-popup-item.active {
   background-color: var(--color-accent);
   color: var(--color-accent-text);
   font-weight: bold;
+  padding: 0; /* Quitar padding para que el wrapper ocupe todo */
 }
+.version-popup-item.active .marquee-wrapper {
+  /* El wrapper (largo) obtiene el padding */
+  padding: 0.8em 1em;
+}
+.version-popup-item.active:not(:has(.marquee-wrapper)) {
+  /* El item (corto) obtiene el padding de vuelta */
+  padding: 0.8em 1em;
+}
+
+
 .version-popup-item.non-native {
   color: var(--color-grey-light);
   font-style: italic;
