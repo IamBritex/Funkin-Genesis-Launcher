@@ -1,0 +1,70 @@
+/* styles/views/mods-header.css */
+
+.content-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20; 
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  background-color: rgba(var(--color-black-rgb), 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1em 1.5em; 
+  border-bottom: 1px solid var(--color-grey-mid);
+}
+.search-bar-container {
+  width: 100%;
+  position: relative;
+  display: flex;
+}
+#search-icon {
+  position: absolute;
+  top: 50%;
+  left: 1em;
+  transform: translateY(-50%);
+  color: var(--color-grey-light);
+  pointer-events: none;
+}
+#search-input {
+  width: 100%;
+  padding: 0.8em 1em 0.8em 2.8em;
+  box-sizing: border-box;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  border: 1px solid var(--color-grey-mid);
+  border-radius: 5px;
+  font-size: 1em;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#search-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 5px rgba(var(--color-accent), 0.5);
+}
+.add-mod-btn-wrapper {
+  flex-shrink: 0;
+}
+#add-mod-header-btn {
+  flex-shrink: 0; 
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px; 
+  color: var(--color-accent);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+#add-mod-header-btn span { display: none; }
+#add-mod-header-btn:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent-text);
+}

@@ -2,7 +2,6 @@
 const { ipcRenderer } = require('electron');
 const dom = require('./dom');
 const state = require('./state');
-// ¡CAMBIO! getFileUrl se usa ahora para todos los iconos
 const { getFileUrl } = require('./utils');
 
 /**
@@ -13,6 +12,8 @@ async function updateFooterState(versionString) {
   if (!engineId || !versionString || !state.versionsData.engines) {
     dom.playButton.disabled = true;
     dom.footerEngineName.textContent = "Error";
+    dom.footerVersionNumber.textContent = '...';
+    dom.osWarningIcon.classList.add('hidden'); // Asegurarse de ocultarlo en error
     return;
   }
   
@@ -31,7 +32,6 @@ async function updateFooterState(versionString) {
     return;
   }
   
-  // ¡CAMBIO! Comprueba icon_path primero, luego icon_base64
   const footerIconData = engineData.icon_path 
     ? getFileUrl(engineData.icon_path) 
     : (engineData.icon_base64 || state.defaultIconUrl);
@@ -58,16 +58,20 @@ async function updateFooterState(versionString) {
   
   state.selectedInstall.isDownloaded = isDownloaded;
   
+  // ¡¡¡CAMBIO CLAVE!!!
+  // Esta es la lógica que SÍ funciona
   const hasNative = versionData.download_urls[state.currentOS];
   
   if (hasNative) {
+    // Si es compatible (nativo)
     dom.osWarningIcon.classList.add('hidden');
     dom.playButtonText.textContent = isDownloaded ? 'Play' : 'Descarga';
     dom.playButton.disabled = false;
   } else {
-    dom.osWarningIcon.classList.remove('hidden');
-    dom.playButtonText.textContent = isDownloaded ? 'Instalado' : 'Play';
-    dom.playButton.disabled = true;
+    // Si NO es compatible (no-nativo)
+    dom.osWarningIcon.classList.remove('hidden'); // Muestra el icono de advertencia
+    dom.playButtonText.textContent = 'No disponible'; 
+    dom.playButton.disabled = true; // Deshabilita el botón
   }
 }
 
@@ -78,8 +82,9 @@ function populateVersionPopup(engineId) {
   dom.versionPopupList.innerHTML = '';
   const engine = state.versionsData.engines.find(e => e.id === engineId);
   
+  // ¡CAMBIO! Filtra solo por versiones NATIVAS
   const compatibleVersions = engine.versions
-    .filter(version => version.download_urls[state.currentOS] || (state.currentOS === 'linux' && version.download_urls['windows']))
+    .filter(version => version.download_urls[state.currentOS]) // <-- Lógica corregida
     .sort((a, b) => {
       const vA = a.version.replace(/[^0-9.]/g, ''); 
       const vB = b.version.replace(/[^0-9.]/g, '');
@@ -91,10 +96,6 @@ function populateVersionPopup(engineId) {
     item.className = 'version-popup-item';
     item.dataset.version = version.version;
     item.textContent = version.version;
-    
-    if (!version.download_urls[state.currentOS]) {
-      item.classList.add('non-native');
-    }
     
     item.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -132,7 +133,6 @@ function selectEngine(engineId) {
   
   const engineData = state.versionsData.engines.find(e => e.id === engineId);
   
-  // ¡CAMBIO! Comprueba icon_path primero, luego icon_base64
   const titleIconData = engineData.icon_path 
     ? getFileUrl(engineData.icon_path) 
     : (engineData.icon_base64 || state.defaultIconUrl);
@@ -142,9 +142,9 @@ function selectEngine(engineId) {
   
   populateVersionPopup(engineId);
   
-  // Seleccionar la última versión compatible
+  // ¡CAMBIO! Seleccionar la última versión NATIVA compatible
   const latestVersion = engineData.versions
-    .filter(v => v.download_urls[state.currentOS] || (state.currentOS === 'linux' && v.download_urls['windows']))
+    .filter(v => v.download_urls[state.currentOS]) // <-- Lógica corregida
     .sort((a, b) => {
       const vA = a.version.replace(/[^0-9.]/g, '');
       const vB = b.version.replace(/[^0-9.]/g, '');
@@ -153,6 +153,12 @@ function selectEngine(engineId) {
 
   if (latestVersion) {
     updateFooterState(latestVersion);
+  } else {
+    // Si no hay ninguna versión nativa, llama a updateFooterState con null
+    // para que muestre el estado deshabilitado.
+    updateFooterState(null); 
+    dom.footerEngineName.textContent = engineData.name;
+    dom.footerVersionNumber.textContent = '---';
   }
 }
 
@@ -175,7 +181,6 @@ function populateEngineList() {
     item.className = 'install-item';
     item.dataset.engineKey = engine.id;
     
-    // ¡CAMBIO! Comprueba icon_path primero, luego icon_base64
     const iconUrl = engine.icon_path 
       ? getFileUrl(engine.icon_path) 
       : (engine.icon_base64 || state.defaultIconUrl);
@@ -185,7 +190,8 @@ function populateEngineList() {
       <span class="install-name">${engine.name}</span>
     `;
     
-    const hasCompatibleVersion = engine.versions.some(v => v.download_urls[state.currentOS] || (state.currentOS === 'linux' && v.download_urls['windows']));
+    // ¡CAMBIO! Comprueba solo compatibilidad NATIVA
+    const hasCompatibleVersion = engine.versions.some(v => v.download_urls[state.currentOS]); // <-- Lógica corregida
     
     if (!hasCompatibleVersion) {
       item.classList.add('disabled');

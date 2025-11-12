@@ -33,6 +33,10 @@ module.exports = {
   newsContainer: document.getElementById('news-container'),
   modsContainer: document.getElementById('mods-container'), 
   
+  // ¡NUEVO! Placeholder de Mods
+  modsPlaceholder: document.getElementById('mods-placeholder'),
+  noModsArrow: document.getElementById('no-mods-arrow'),
+  
   // ¡NUEVO! Cabecera de Mods
   modsHeader: document.getElementById('mods-header'),
   searchInput: document.getElementById('search-input'),

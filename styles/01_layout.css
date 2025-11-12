@@ -10,7 +10,6 @@
   border-bottom: 1px solid var(--color-grey-mid);
   flex-shrink: 0;
 }
-
 .title-bar-drag-region {
   -webkit-app-region: drag;
   display: flex;
@@ -19,18 +18,13 @@
   height: 100%;
   padding-left: 1em; 
 }
-
 .title-bar-left {
   display: flex;
   align-items: center;
   gap: 0.5em;
   font-weight: bold;
 }
-.title-icon {
-  width: 24px;
-  height: 24px;
-}
-
+.title-icon { width: 24px; height: 24px; }
 .title-bar-right {
   display: flex;
   height: 100%;
@@ -46,14 +40,18 @@
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.window-control-btn:hover {
-  background-color: var(--color-grey-mid);
-}
+.window-control-btn:hover { background-color: var(--color-grey-mid); }
 .window-control-btn.close-btn:hover {
   background-color: var(--color-red-hover);
   color: var(--color-white);
 }
-/* ------------------------------------- */
+
+/* --- LAYOUT --- */
+.app-layout { 
+  display: flex; 
+  flex-grow: 1;
+  overflow: hidden;
+}
 
 /* --- SIDEBAR --- */
 .sidebar {
@@ -70,7 +68,6 @@
   max-width: 500px;
 }
 .sidebar.collapsed { width: 0; padding-left: 0; padding-right: 0; border-right-color: transparent; }
-
 
 .nav-top { width: 100%; }
 .nav-item, .nav-button, .config-btn {
@@ -96,7 +93,6 @@
   border: 1px solid var(--color-grey-light);
 }
 .config-btn:hover { background-color: var(--color-grey-mid); }
-
 .sidebar-buttons-group { display: flex; width: 100%; margin-bottom: 0.5em; }
 .sidebar-buttons-group .config-btn { 
   flex-grow: 1; 
@@ -105,7 +101,6 @@
   align-items: center; 
   overflow: hidden; 
 }
-
 .sidebar-buttons-group .config-btn.disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -113,10 +108,7 @@
   border-color: var(--color-grey-mid);
   color: var(--color-grey-light);
 }
-.sidebar-buttons-group .config-btn.disabled:hover {
-  background-color: transparent;
-}
-
+.sidebar-buttons-group .config-btn.disabled:hover { background-color: transparent; }
 
 #engine-list { flex-grow: 1; overflow-y: auto; margin-top: 1em; }
 .install-item { display: flex; align-items: center; padding: 0.8em; margin-bottom: 0.5em; border-radius: 5px; cursor: pointer; border: 1px solid transparent; }
@@ -127,8 +119,7 @@
 .install-item img { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; margin-right: 0.8em; flex-shrink: 0; }
 .install-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--color-white); }
 
-
-/* --- ESTILOS DE REDIMENSIONADOR --- */
+/* --- RESIZER --- */
 .resizer {
   width: 5px;
   background: var(--color-grey-light);
@@ -140,16 +131,16 @@
 .resizer:hover { background: var(--color-accent); }
 .resizer.collapsed { display: none; }
 
-/* --- Contenido Principal --- */
+/* --- CONTENT --- */
 .content {
   flex-grow: 1;
-  overflow: hidden; /* ¡CAMBIO! El .content NO se desplaza */
+  overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
-/* --- ESTILOS DEL FOOTER --- */
+/* --- FOOTER --- */
 .content-footer {
   flex-shrink: 0;
   display: flex;
@@ -160,7 +151,4 @@
   border-top: 1px solid var(--color-grey-mid);
   position: relative;
 }
-
-#download-progress-bar-container:not(.hidden) + .content-footer {
-  border-top: none;
-}
+#download-progress-bar-container:not(.hidden) + .content-footer { border-top: none; }

@@ -2,35 +2,36 @@
 const { ipcRenderer } = require('electron');
 const dom = require('./dom');
 const state = require('./state');
-const yaml = require('js-yaml'); // <-- ¡NUEVO!
+const yaml = require('js-yaml'); 
 
 /**
  * Carga versions.yaml (Remoto con fallback local).
  * @param {function} populateEngineListCallback - Función para llamar tras cargar datos.
  */
 async function loadVersionData(populateEngineListCallback) {
-  // ¡CAMBIO! Apunta a tu YAML en GitHub
   const remoteUrl = 'https://raw.githubusercontent.com/IamBritex/Funkin-Genesis-Launcher/main/versions.yaml';
-  const localUrl = './versions.yaml'; // <-- ¡CAMBIO!
+  const localUrl = './versions.yaml'; 
 
   try {
     const response = await fetch(remoteUrl, { cache: "no-store" });
     if (!response.ok) {
       throw new Error(`Network response was not ok: ${response.status}`);
     }
-    const yamlText = await response.text(); // <-- ¡CAMBIO!
-    state.versionsData = yaml.load(yamlText); // <-- ¡CAMBIO!
+    const yamlText = await response.text(); 
+    state.versionsData = yaml.load(yamlText); 
     console.log('versions.yaml cargado desde GitHub');
   } catch (err) {
     console.warn('Error cargando versions.yaml remoto. Usando local.', err.message);
     try {
-      const response = await fetch(localUrl);
-      const yamlText = await response.text(); // <-- ¡CAMBIO!
-      state.versionsData = yaml.load(yamlText); // <-- ¡CAMBIO!
+      // ¡¡¡CAMBIO CLAVE AQUÍ!!!
+      // Añadido { cache: "no-store" } para que siempre lea los cambios locales.
+      const response = await fetch(localUrl, { cache: "no-store" });
+      const yamlText = await response.text(); 
+      state.versionsData = yaml.load(yamlText); 
       console.log('versions.yaml cargado desde archivo local');
     } catch (localErr) {
       console.error('Error cargando versions.yaml local:', localErr);
-      state.versionsData = { engines: [] }; // <-- ¡CAMBIO! (array vacío)
+      state.versionsData = { engines: [] }; 
       throw new Error("Error fatal: No se pudo cargar versions.yaml");
     }
   }

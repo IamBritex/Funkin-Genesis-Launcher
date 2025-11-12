@@ -1,0 +1,76 @@
+/* styles/views/mods-placeholder.css */
+
+#mods-placeholder {
+  /* Ocupa todo el espacio de la cuadrícula de mods */
+  grid-column: 1 / -1; 
+  text-align: center;
+  margin-top: 5em;
+  color: var(--color-grey-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  /* ¡CAMBIO! Necesario para que la flecha absoluta se base en él */
+  position: relative; 
+}
+
+.placeholder-content {
+  display: none; /* Ocultos por defecto */
+  flex-direction: column;
+  align-items: center;
+}
+
+#mods-placeholder.hidden {
+  display: none;
+}
+
+/* Mostrar el contenido correcto según el estado */
+#mods-placeholder[data-state="no-mods"] #no-mods-content {
+  display: flex;
+}
+#mods-placeholder[data-state="no-results"] #no-results-content {
+  display: flex;
+}
+
+#mods-placeholder img {
+  /* ¡CAMBIO! Ancho máximo y altura automática para respetar la proporción */
+  max-width: 250px;
+  height: auto; 
+  opacity: 0.7;
+  margin-bottom: 1em;
+}
+
+#mods-placeholder h2 {
+  color: var(--color-grey-light);
+  font-weight: 500;
+}
+
+/* --- Animación de la Flecha --- */
+/* ¡CAMBIO! La flecha ahora se mueve hacia arriba y desaparece */
+@keyframes fadeOutAndUp {
+  0% { opacity: 0.8; transform: translateY(20px); }
+  80% { opacity: 0.8; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+/* --- ¡CAMBIO! Posicionamiento de la Flecha --- */
+#no-mods-arrow {
+  /* Posición absoluta relativa al placeholder */
+  position: absolute;
+  
+  /* Lo mueve ARRIBA del contenido del placeholder */
+  bottom: 100%; 
+  
+  /* Lo alinea a la izquierda, donde está el botón de "Añadir Mod" */
+  left: 1.5em; 
+  
+  /* Espacio entre la flecha y la imagen */
+  margin-bottom: 4em;
+  
+  font-size: 2.5em;
+  color: var(--color-accent);
+  
+  /* Animación: 3s, 1 vez, se mantiene al final (invisible) */
+  animation: fadeOutAndUp 3s 1 forwards;
+  opacity: 0; /* Estado final de la animación */
+}

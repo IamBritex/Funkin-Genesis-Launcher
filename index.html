@@ -63,7 +63,6 @@
       <div class="content">
 
         <div id="mods-header" class="content-header hidden">
-          <!-- ¡CAMBIO! El botón ahora va primero -->
           <div class="add-mod-btn-wrapper">
             <button id="add-mod-header-btn">
               <i class="fas fa-plus"></i>
@@ -75,10 +74,27 @@
             <input type="text" id="search-input" placeholder="Buscar mods...">
           </div>
         </div>
+        
         <div id="news-container">
           </div>
 
         <div id="mods-container" class="hidden">
+          <div id="mods-placeholder" class="hidden">
+            
+            <div class="placeholder-content" id="no-mods-content">
+              <div id="no-mods-arrow">
+                <i class="fas fa-arrow-up"></i>
+              </div>
+              <img src="images/no-mods.png" alt="No hay mods"/>
+              <h2>Prueba a instalar un mod</h2>
+            </div>
+            
+            <div class="placeholder-content" id="no-results-content">
+              <img src="images/nothing.png" alt="Sin resultados"/>
+              <h2>Nada por aquí... ¡prueba otra cosa!</h2>
+            </div>
+
+          </div>
           </div>
 
         <div id="download-progress-bar-container" class="hidden">

@@ -10,6 +10,42 @@ let modsLoaded = false;
 let searchTimer = null; // Timer para el debounce de la búsqueda
 
 /**
+ * ¡NUEVO! Función centralizada para mostrar/ocultar placeholders.
+ * Esto resuelve el problema de que desaparezcan.
+ */
+function updatePlaceholderVisibility() {
+  const query = dom.searchInput.value.toLowerCase();
+  let visibleCards = 0;
+  const allModCards = dom.modsContainer.querySelectorAll('.mod-card');
+
+  allModCards.forEach(card => {
+    // Comprueba si la tarjeta está visible (no oculta por la búsqueda)
+    if (card.style.display !== 'none') {
+      visibleCards++;
+    }
+  });
+
+  if (allModCards.length === 0) {
+    // Estado 1: No hay mods instalados
+    dom.modsPlaceholder.classList.remove('hidden');
+    dom.modsPlaceholder.dataset.state = 'no-mods';
+    
+    // Forzar la re-animación de la flecha
+    const newArrow = dom.noModsArrow.cloneNode(true);
+    dom.noModsArrow.parentNode.replaceChild(newArrow, dom.noModsArrow);
+    dom.noModsArrow = newArrow; // Actualizar la referencia en el DOM
+    
+  } else if (allModCards.length > 0 && visibleCards === 0 && query !== '') {
+    // Estado 2: Hay mods, pero la búsqueda no encontró nada
+    dom.modsPlaceholder.classList.remove('hidden');
+    dom.modsPlaceholder.dataset.state = 'no-results';
+  } else {
+    // Estado 3: Hay mods y son visibles (o no hay búsqueda)
+    dom.modsPlaceholder.classList.add('hidden');
+  }
+}
+
+/**
  * Genera el HTML para una tarjeta de mod, incluyendo el menú kebab.
  */
 function createModCard(mod) {
@@ -27,8 +63,16 @@ function createModCard(mod) {
   // 3. Definir la versión
   const versionString = mod.version ? `<span class="mod-version">v${mod.version}</span>` : '';
 
+  // 4. Definir estado de visibilidad (por ahora solo visual)
+  const isVisible = mod.visible !== false; // Asumir true si no está definido
+  const cardClasses = isVisible ? "mod-card" : "mod-card disabled";
+  const visibleButtonText = isVisible 
+    ? '<i class="fas fa-eye"></i> Visible' 
+    : '<i class="fas fa-eye-slash"></i> Oculto';
+
+
   return `
-    <div class="mod-card" data-folder-name="${mod.folderName}" data-title="${mod.title}">
+    <div class="${cardClasses}" data-folder-name="${mod.folderName}" data-title="${mod.title}">
       
       <div class="mod-card-inner-wrapper">
         <div class="mod-card-banner" style="${bannerStyle}"></div>
@@ -46,6 +90,11 @@ function createModCard(mod) {
           <button class="mod-menu-action" data-action="modify">
             <i class="fas fa-pencil-alt"></i> Modificar
           </button>
+          
+          <button class="mod-menu-action" data-action="toggle-visible">
+            ${visibleButtonText}
+          </button>
+          
           <button class="mod-menu-action delete" data-action="delete">
             <i class="fas fa-trash"></i> Eliminar
           </button>
@@ -57,25 +106,28 @@ function createModCard(mod) {
 }
 
 /**
- * ¡CAMBIO! Dibuja solo las tarjetas de mods.
+ * ¡CAMBIO! Esta función ahora solo AÑADE tarjetas. La lógica del placeholder se movió.
  */
 function renderModCards(mods = []) {
-  dom.modsContainer.innerHTML = ''; 
-  
   let modsHtml = '';
   mods.forEach(mod => {
     modsHtml += createModCard(mod);
   });
-  dom.modsContainer.innerHTML = modsHtml; 
+  // Usamos insertAdjacentHTML para AÑADIR las tarjetas
+  // sin borrar el placeholder que ya está en el HTML.
+  dom.modsContainer.insertAdjacentHTML('beforeend', modsHtml);
 
-  // ¡CAMBIO! Ya no se añade la tarjeta "Añadir" ni su listener aquí.
   addModCardListeners(); 
+  
+  // ¡CAMBIO! Llamar a la función centralizada
+  updatePlaceholderVisibility();
 }
 
 /**
  * Añade listeners para los menús kebab de las tarjetas.
  */
 function addModCardListeners() {
+  // ... (código sin cambios, lo omito por brevedad, pero debe estar aquí) ...
   // Cierra menús al hacer clic fuera
   window.addEventListener('click', (e) => {
     if (!e.target.closest('.mod-kebab-menu')) {
@@ -119,6 +171,19 @@ function addModCardListeners() {
 
       if (action === 'modify') {
         showToast('La función "Modificar" no está implementada aún.');
+      
+      } else if (action === 'toggle-visible') {
+        const isDisabling = !card.classList.contains('disabled');
+        card.classList.toggle('disabled');
+        
+        if (isDisabling) {
+          e.currentTarget.innerHTML = '<i class="fas fa-eye-slash"></i> Oculto';
+        } else {
+          e.currentTarget.innerHTML = '<i class="fas fa-eye"></i> Visible';
+        }
+        
+        showToast(`Visibilidad de "${title}" cambiada (solo visual).`, false);
+
       } else if (action === 'delete') {
         state.pendingDeleteData = {
           type: 'delete-mod', 
@@ -150,19 +215,14 @@ async function handleAddModClick() {
     if (validationResult.status === 'cancelled') {
       return; 
     }
-
     if (validationResult.error) {
       showToast(validationResult.error, true);
       return;
     }
-
     if (validationResult.success) {
       const { modData, selectedPath, folderName } = validationResult;
-
       showLoadingToast(`Instalando mod "${modData.title}"...`);
-
       const installResult = await ipcRenderer.invoke('mods:install-mod', { selectedPath, folderName });
-
       hideLoadingToast();
 
       if (installResult.success) {
@@ -172,7 +232,6 @@ async function handleAddModClick() {
         showToast(installResult.error, true);
       }
     }
-
   } catch (err) {
     console.error("Error en el proceso de añadir mod:", err);
     hideLoadingToast(); 
@@ -181,13 +240,21 @@ async function handleAddModClick() {
 }
 
 /**
- * Pide los mods instalados al proceso principal y los renderiza.
+ * ¡CAMBIO! Esta función ahora LIMPIA las tarjetas viejas antes de renderizar.
  */
 async function loadInstalledMods() {
   try {
+    // 1. ¡CAMBIO! Borrar solo las tarjetas .mod-card,
+    // dejando el #mods-placeholder intacto.
+    dom.modsContainer.querySelectorAll('.mod-card').forEach(card => card.remove());
+
+    // 2. Cargar los mods
     const mods = await ipcRenderer.invoke('mods:get-installed');
+    
+    // 3. Renderizar (esta función ahora solo añade tarjetas y llama a updatePlaceholderVisibility)
     renderModCards(mods);
     modsLoaded = true;
+    
   } catch (err) {
     console.error("Error al invocar 'mods:get-installed':", err);
     showToast('Error al cargar la lista de mods.', true);
@@ -195,53 +262,51 @@ async function loadInstalledMods() {
 }
 
 /**
- * ¡NUEVO! Inicializa la barra de búsqueda de mods.
+ * ¡CAMBIO! Lógica de búsqueda actualizada para manejar placeholders dinámicos.
  */
 function initModsSearch() {
   dom.searchInput.addEventListener('input', () => {
-    // 1. Mostrar spinner
     dom.searchIcon.className = 'fas fa-spinner fa-spin';
-
-    // 2. Limpiar timer anterior (debounce)
     clearTimeout(searchTimer);
 
-    // 3. Crear nuevo timer
     searchTimer = setTimeout(() => {
       const query = dom.searchInput.value.toLowerCase();
       
-      dom.modsContainer.querySelectorAll('.mod-card:not(.add-mod-card)').forEach(card => {
+      // Itera sobre las tarjetas de mod (ignora el placeholder)
+      dom.modsContainer.querySelectorAll('.mod-card').forEach(card => {
         const title = card.dataset.title.toLowerCase();
         
-        // Compara el título con la búsqueda
         if (title.includes(query)) {
-          card.style.display = 'flex'; // 'flex' porque es un flex-column
+          card.style.display = 'flex';
         } else {
-          card.style.display = 'none'; // Ocultar
+          card.style.display = 'none';
         }
       });
 
-      // 4. Devolver a lupita
+      // ¡CAMBIO! Llamar a la función centralizada
+      updatePlaceholderVisibility();
+
       dom.searchIcon.className = 'fas fa-search';
-    }, 300); // 300ms de espera
+    }, 300);
   });
 }
 
 /**
- * ¡CAMBIO! Muestra la vista de Mods y la cabecera.
+ * Muestra la vista de Mods y la cabecera.
  */
 function showModsView() {
   dom.newsContainer.classList.add('hidden');
   dom.modsContainer.classList.remove('hidden');
-  dom.modsHeader.classList.remove('hidden'); // ¡NUEVO!
+  dom.modsHeader.classList.remove('hidden'); 
   
-  // ¡¡¡CAMBIO CLAVE!!! Se re-añade la línea de 'paddingTop'
-  // Esto empuja el contenedor de mods hacia abajo para que no quede
-  // oculto bajo la cabecera (que ahora es 'position: absolute')
   dom.modsContainer.style.paddingTop = `${dom.modsHeader.offsetHeight}px`;
   
   if (state.versionsData.engines) {
     if (!modsLoaded) {
       loadInstalledMods();
+    } else {
+      // ¡CAMBIO! Si ya estaban cargados, solo revisa el placeholder
+      updatePlaceholderVisibility();
     }
   } else {
     console.warn("Esperando a versionsData... reintentando en 500ms");
@@ -258,12 +323,15 @@ function showModsView() {
 }
 
 /**
- * ¡CAMBIO! Muestra la vista de Noticias y oculta la cabecera de mods.
+ * Muestra la vista de Noticias y oculta la cabecera de mods.
  */
 function showNewsView() {
   dom.modsContainer.classList.add('hidden');
-  dom.modsHeader.classList.add('hidden'); // ¡NUEVO!
+  dom.modsHeader.classList.add('hidden'); 
   dom.newsContainer.classList.remove('hidden');
+  
+  // Ocultar el placeholder al salir
+  dom.modsPlaceholder.classList.add('hidden');
   
   loadNews();
 
@@ -275,7 +343,7 @@ function showNewsView() {
 
   isModsViewActive = false;
   
-  // ¡NUEVO! Resetea la búsqueda al salir de la vista de mods
+  // Resetea la búsqueda al salir de la vista de mods
   dom.searchInput.value = '';
   dom.modsContainer.querySelectorAll('.mod-card').forEach(card => {
     card.style.display = 'flex';
@@ -284,7 +352,7 @@ function showNewsView() {
 }
 
 /**
- * ¡CAMBIO! Inicializa el botón de Mods y el nuevo botón de Añadir.
+ * Inicializa el botón de Mods y el nuevo botón de Añadir.
  */
 function initMods() {
   // Botón del Sidebar (Mods/Noticias)

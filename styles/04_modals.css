@@ -21,10 +21,8 @@
 .form-input,.form-select{width:100%;padding:.8em;box-sizing:border-box;background-color:var(--color-grey-mid);color:var(--color-white);border:1px solid var(--color-grey-light);border-radius:5px;font-size:1em}
 .form-select:disabled{background-color:var(--color-grey-dark);color:var(--color-grey-light);border-color:var(--color-grey-mid)}
 
-/* --- ESTILOS LOADING MODAL --- */
-#loading-overlay{
-  z-index:2000;
-}
+/* --- LOADING MODAL --- */
+#loading-overlay{ z-index:2000; }
 #loading-overlay .modal { max-width: 300px; }
 #loading-status{ 
   font-size: 1.2em;
@@ -34,10 +32,8 @@
   color: var(--color-white);
 }
 
-/* --- ESTILOS CONFIRM MODAL --- */
-#modal-confirm {
-  z-index: 3000;
-}
+/* --- CONFIRM MODAL --- */
+#modal-confirm { z-index: 3000; }
 .confirm-modal{max-width:420px}
 .confirm-modal h2{margin-top:0}
 .confirm-modal p{color:var(--color-white);opacity:.85;line-height:1.5;font-size:1.1em}
@@ -48,22 +44,16 @@
 .confirm-no{background-color:transparent;color:var(--color-white);border-color:var(--color-grey-mid)}
 .confirm-no:hover{background-color:var(--color-red-hover);border-color:var(--color-red-hover);color:var(--color-white)}
 
-/* --- ESTILOS CONFIG MODAL --- */
+/* --- CONFIG MODAL --- */
 .config-modal{max-width:500px;text-align:left}
 .config-modal h2{text-align:center;margin-top:0}
 .config-option{display:flex;justify-content:space-between;align-items:center;padding:1em;margin-bottom:.5em;background-color:var(--color-black);border:1px solid var(--color-grey-mid);border-radius:6px}
 .config-option label{font-weight:500}
 .config-option .form-select{width:150px}
 
-/* --- Estilos para el Modal de Gestión --- */
-.manage-versions-modal {
-  max-width: 600px;
-  text-align: left;
-}
-.manage-versions-modal h2 {
-  text-align: center;
-  margin-top: 0;
-}
+/* --- MANAGE VERSIONS MODAL --- */
+.manage-versions-modal { max-width: 600px; text-align: left; }
+.manage-versions-modal h2 { text-align: center; margin-top: 0; }
 .manage-versions-list {
   max-height: 400px;
   overflow-y: auto;
@@ -72,12 +62,8 @@
   border-radius: 6px;
   background-color: var(--color-black);
 }
-.engine-group {
-  border-bottom: 1px solid var(--color-grey-mid);
-}
-.engine-group:last-child {
-  border-bottom: none;
-}
+.engine-group { border-bottom: 1px solid var(--color-grey-mid); }
+.engine-group:last-child { border-bottom: none; }
 .engine-header {
   display: flex;
   align-items: center;
@@ -89,37 +75,18 @@
   top: 0;
   z-index: 10;
 }
-.engine-header:hover {
-  background-color: var(--color-grey-mid);
-}
+.engine-header:hover { background-color: var(--color-grey-mid); }
 .engine-header img {
   width: 24px;
   height: 24px;
   border-radius: 4px;
   margin-right: 0.8em;
 }
-.engine-header span {
-  font-weight: bold;
-  font-size: 1.1em;
-  flex-grow: 1;
-}
-.engine-header .collapse-icon {
-  transition: transform 0.3s ease;
-  margin-left: 1em;
-}
-.engine-group.collapsed .collapse-icon {
-  transform: rotate(-90deg);
-}
-
-.version-list {
-  max-height: 1000px; 
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-}
-.engine-group.collapsed .version-list {
-  max-height: 0;
-}
-
+.engine-header span { font-weight: bold; font-size: 1.1em; flex-grow: 1; }
+.engine-header .collapse-icon { transition: transform 0.3s ease; margin-left: 1em; }
+.engine-group.collapsed .collapse-icon { transform: rotate(-90deg); }
+.version-list { max-height: 1000px; overflow: hidden; transition: max-height 0.3s ease-out; }
+.engine-group.collapsed .version-list { max-height: 0; }
 .version-item {
   display: flex;
   align-items: center;
@@ -128,10 +95,7 @@
   border-top: 1px solid var(--color-grey-mid);
   position: relative;
 }
-.version-item-name {
-  padding-left: 1em;
-  position: relative;
-}
+.version-item-name { padding-left: 1em; position: relative; }
 .version-item-name::before {
   content: '|-';
   position: absolute;
@@ -139,16 +103,8 @@
   top: 0;
   color: var(--color-grey-light);
 }
-
-.version-actions {
-  display: flex;
-  gap: 0.5em;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.version-item:hover .version-actions {
-  opacity: 1;
-}
+.version-actions { display: flex; gap: 0.5em; opacity: 0; transition: opacity 0.2s ease; }
+.version-item:hover .version-actions { opacity: 1; }
 .action-btn {
   background: var(--color-grey-mid);
   border: none;
@@ -160,19 +116,7 @@
   font-size: 0.9em;
   transition: background-color 0.2s, color 0.2s;
 }
-.action-btn:hover {
-  background: var(--color-accent);
-  color: var(--color-accent-text);
-}
-.action-btn.delete:hover {
-  background: var(--color-red-hover);
-  color: var(--color-white);
-}
-.action-btn[title="Editar (Próximamente)"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.action-btn[title="Editar (Próximamente)"]:hover {
-  background: var(--color-grey-mid);
-  color: var(--color-white);
-}
+.action-btn:hover { background: var(--color-accent); color: var(--color-accent-text); }
+.action-btn.delete:hover { background: var(--color-red-hover); color: var(--color-white); }
+.action-btn[title="Editar (Próximamente)"] { opacity: 0.5; cursor: not-allowed; }
+.action-btn[title="Editar (Próximamente)"]:hover { background: var(--color-grey-mid); color: var(--color-white); }
