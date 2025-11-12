@@ -94,13 +94,9 @@ function populateVersionPopup(engineId) {
   dom.versionPopupList.innerHTML = '';
   const engine = state.versionsData.engines.find(e => e.id === engineId);
   
-  const allVersions = engine.versions
-    .sort((a, b) => {
-      // ¡CAMBIO! Eliminadas las líneas .replace()
-      // 'localeCompare' con 'numeric: true' ordena correctamente
-      // "1.0.1 - Latest" (más nuevo) antes que "1.0.1-rc2" (más viejo)
-      return b.version.localeCompare(a.version, undefined, { numeric: true });
-    });
+  // ¡CAMBIO! Eliminada la función .sort()
+  // Ahora usa el orden directamente del 'versions.yaml'
+  const allVersions = engine.versions;
 
   allVersions.forEach(version => {
     const item = document.createElement('div');
@@ -161,11 +157,9 @@ function selectEngine(engineId) {
   
   populateVersionPopup(engineId);
   
-  // ¡CAMBIO! Esta lógica ahora usará el ordenamiento corregido
-  const latestVersion = engineData.versions
-    .sort((a, b) => {
-      return b.version.localeCompare(a.version, undefined, { numeric: true });
-    })[0]?.version; 
+  // ¡CAMBIO! Eliminada la función .sort()
+  // Simplemente toma la primera versión [0] del YAML
+  const latestVersion = engineData.versions[0]?.version; 
 
   if (latestVersion) {
     updateFooterState(latestVersion);
