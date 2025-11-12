@@ -55,19 +55,12 @@ engines:
       - version: "0.5.0"
         download_urls:
           windows: "https://github.com/FunkinCrew/Funkin/releases/download/v0.5.0/funkin-windows-64.zip"
-          linux: "https://github.com/FunkinCrew/Funkin/releases/download/v0.5.0/funkin-linux-64.zip"
       - version: "0.4.1"
         download_urls:
           windows: "https://github.com/FunkinCrew/Funkin/releases/download/v0.4.1/funkin-windows-64.zip"
-          linux: "https://github.com/FunkinCrew/Funkin/releases/download/v0.4.1/funkin-linux-64.zip"
-      - version: "0.4.0"
-        download_urls:
-          windows: "https://github.com/FunkinCrew/Funkin/releases/download/v0.4.0/funkin-windows-64.zip"
-          linux: "https://github.com/FunkinCrew/Funkin/releases/download/v0.4.0/funkin-linux-64.zip"
       - version: "0.3.3"
         download_urls:
           windows: "https://github.com/FunkinCrew/Funkin/releases/download/v0.3.3/funkin-windows-64.zip"
-          linux: "https://github.com/FunkinCrew/Funkin/releases/download/v0.3.3/funkin-linux-64.zip"
 
   - id: psych
     name: "Psych Engine"
@@ -90,6 +83,52 @@ engines:
         download_urls:
           windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.2/PsychEngine-Windows64.zip"
           linux: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.2/PsychEngine-Linux.zip"
+      - version: "1.0.1"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.1/PsychEngine-Windows64.zip"
+          linux: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0.1/PsychEngine-Linux.zip"
+      - version: "1.0"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0/PsychEngine-Windows64.zip"
+      - version: "1.0 (Prerelease)"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/1.0-prerelease/PsychEngine-Windows64.zip"
+      - version: "0.7.3"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.7.3/PsychEngine-Windows64.zip"
+      - version: "0.7.2h"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.7.2h/PsychEngine-Windows64.zip"
+      - version: "0.7.2"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.7.2/PsychEngine-Windows64.zip"
+      - version: "0.7.1h"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.7.1h/PsychEngine-Windows64.zip"
+      - version: "0.7.1 - HScript Beta"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.7.1/PsychEngine-Windows64.zip"
+      - version: "0.7"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.7/PsychEngine-Windows64.zip"
+      - version: "0.6.3"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.6.3/PsychEngine-Windows64.zip"
+      - version: "0.6.2"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.6.1/PsychEngine-Windows64.zip"
+      - version: "0.6.1"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.6.1/PsychEngine-Windows64.zip"
+      - version: "0.5.3b (lammed) - APRIL FOOLS 2022"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.5.3b/PsychEngine-Windows64.zip"
+      - version: "0.5.2h"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.5.2h/PsychEngine-Windows64.zip"
+      - version: "0.5.2h"
+        download_urls:
+          windows: "https://github.com/ShadowMario/FNF-PsychEngine/releases/download/0.5.2h/PsychEngine-Windows64.zip"
 
   - id: codee
     name: "Codename Engine"
